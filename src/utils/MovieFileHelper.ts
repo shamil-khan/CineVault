@@ -41,7 +41,7 @@ export const toMovieFile = (fileName: string): MovieFile | undefined => {
 
   const title = removeWordsFromString(fileName, MovieAttributes)
     .replace(/[._-]/g, ' ')
-    .replace(/[[\]()]/g, ' ')
+    .replace(/[[\](){}+-]/g, ' ')
     .trim();
 
   const yearMatch = title.match(/(\d{4})$/);
@@ -51,7 +51,12 @@ export const toMovieFile = (fileName: string): MovieFile | undefined => {
   // );
   return {
     fileName: fileName,
-    title: yearMatch ? title.replace(/(\d{4})$/, '').trim() : title,
+    title: yearMatch
+      ? title
+          .replace(/(\d{4})$/, '')
+          .replace(/([a-z0-9])([A-Z])|([A-Z])([A-Z][a-z])/g, '$1$3 $2$4')
+          .trim()
+      : title,
     year: yearMatch ? yearMatch[1] : '',
   };
 };

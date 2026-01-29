@@ -57,6 +57,8 @@ const MovieRippers = [
   'TASTE',
   'TiTAN',
   'VXT',
+  'DDP',
+  'FilmyMeet',
 ];
 
 const MovieSizes = ['450MB', '800MB', '1GB', '1.5GB', '2GB', '3GB', '4GB'];
@@ -135,6 +137,7 @@ const MovieSubs = ['ESub', 'HSub', 'FSub', 'DSub', 'ISub', 'ASub'];
 const MovieOtherTags = [
   'Audio',
   'Dual',
+  'Dub',
   'MULTi',
   'SUB',
   'LiNE',
