@@ -41,7 +41,7 @@ export const CompactFolderUpload = ({
 
     if (!fileList || fileList.length === 0) {
       clogger.info(`No file(s) selected`, 'CompactFolderUpload');
-      onUploaded([]);
+      // onUploaded([]);
       return;
     }
 
@@ -60,6 +60,7 @@ export const CompactFolderUpload = ({
 
     setLoading(false);
     onUploaded(fileNames);
+    event.target.value = '';
   };
 
   return (
