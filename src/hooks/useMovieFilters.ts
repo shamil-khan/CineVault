@@ -165,11 +165,13 @@ export const useMovieFilters = () => {
               movieCountries.includes(c.toLowerCase()),
             );
 
-      const matchesFavorite = filters.isFavorite
-        ? movie.status?.isFavorite
-        : true;
+      const matchesFavorite =
+        filters.isFavorite === undefined ||
+        (movie.status?.isFavorite ?? false) === filters.isFavorite;
 
-      const matchesWatched = filters.isWatched ? movie.status?.isWatched : true;
+      const matchesWatched =
+        filters.isWatched === undefined ||
+        (movie.status?.isWatched ?? false) === filters.isWatched;
 
       const selectedCategoryIds = filters.category.map((c) => parseInt(c, 10));
       const matchesCategory =

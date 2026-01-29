@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Heart, Eye, ListFilter } from 'lucide-react';
+import { Heart, Eye, EyeOff, HeartOff, ListFilter } from 'lucide-react';
 import { useMovieFilters } from '@/hooks/useMovieFilters';
 import { cn } from '@/lib/utils';
 import { ActionTooltip } from '../ActionTooltip';
@@ -14,6 +14,16 @@ export const LibraryFilterToggleGroup = ({
 }: LibraryFilterToggleGroupProps) => {
   const { filters, onFiltersUpdated } = useMovieFilters();
 
+  const FavoriteIcon =
+    filters.isFavorite === undefined
+      ? Heart
+      : filters.isFavorite
+        ? Heart
+        : HeartOff;
+
+  const WatchedIcon =
+    filters.isWatched === undefined ? Eye : filters.isWatched ? Eye : EyeOff;
+
   return (
     <div
       className='flex items-center gap-0'
@@ -21,7 +31,13 @@ export const LibraryFilterToggleGroup = ({
       <TooltipProvider>
         <div className='flex w-full justify-around items-center max-w-sm mx-auto gap-1'>
           <ActionTooltip
-            label={filters.isFavorite ? 'Hide Favorites' : 'Show Favorites'}
+            label={
+              filters.isFavorite === undefined
+                ? 'All Movies (toggle to Favorites)'
+                : filters.isFavorite
+                  ? 'Show Favorites (toggle to Unfavorited)'
+                  : 'Show Unfavorited (toggle to All)'
+            }
             variant='rose'>
             <Button
               variant='ghost'
@@ -35,15 +51,20 @@ export const LibraryFilterToggleGroup = ({
                 e.stopPropagation();
                 onFiltersUpdated({
                   ...filters,
-                  isFavorite: !filters.isFavorite,
+                  isFavorite:
+                    filters.isFavorite === undefined
+                      ? true
+                      : filters.isFavorite
+                        ? false
+                        : undefined,
                 });
               }}>
-              <Heart
+              <FavoriteIcon
                 className={cn(
                   'w-5 h-5',
-                  filters.isFavorite
-                    ? 'fill-rose-500 text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]'
-                    : 'text-zinc-600',
+                  filters.isFavorite === undefined
+                    ? 'text-zinc-600'
+                    : 'fill-rose-500 text-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.4)]',
                 )}
               />
             </Button>
@@ -51,7 +72,13 @@ export const LibraryFilterToggleGroup = ({
 
           {/* 2. WATCH - Emerald Border Glow */}
           <ActionTooltip
-            label={filters.isWatched ? 'Hide Watched' : 'Show Watched'}
+            label={
+              filters.isWatched === undefined
+                ? 'All Movies (toggle to Watched)'
+                : filters.isWatched
+                  ? 'Show Watched (toggle to Unwatched)'
+                  : 'Show Unwatched (toggle to All)'
+            }
             variant='emerald'>
             <Button
               variant='ghost'
@@ -65,15 +92,20 @@ export const LibraryFilterToggleGroup = ({
                 e.stopPropagation();
                 onFiltersUpdated({
                   ...filters,
-                  isWatched: !filters.isWatched,
+                  isWatched:
+                    filters.isWatched === undefined
+                      ? true
+                      : filters.isWatched
+                        ? false
+                        : undefined,
                 });
               }}>
-              <Eye
+              <WatchedIcon
                 className={cn(
                   'w-5 h-5',
-                  filters.isWatched
-                    ? 'text-emerald-600 fill-emerald-600/30'
-                    : 'text-zinc-600',
+                  filters.isWatched === undefined
+                    ? 'text-zinc-600'
+                    : 'text-emerald-600 fill-emerald-600/30',
                 )}
               />
             </Button>

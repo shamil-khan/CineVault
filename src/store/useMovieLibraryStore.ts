@@ -75,8 +75,8 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         language: [],
         country: [],
         category: [],
-        isFavorite: false,
-        isWatched: false,
+        isFavorite: undefined,
+        isWatched: undefined,
       },
 
       loadMovies: async () => {

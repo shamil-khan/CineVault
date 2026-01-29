@@ -103,8 +103,8 @@ export interface MovieFilterCriteria {
   language: string[];
   country: string[];
   category: string[];
-  isFavorite: boolean;
-  isWatched: boolean;
+  isFavorite?: boolean;
+  isWatched?: boolean;
 }
 
 export type MovieInfo = {
