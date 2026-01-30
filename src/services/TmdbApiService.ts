@@ -1,6 +1,8 @@
 import logger from '@/core/logger';
 import { ApiService } from '@/services/ApiService';
+import { compressImageBuffer } from '@/utils/MovieFileHelper';
 
+const TMDB_IMAGE_URL = import.meta.env.VITE_TMDB_IMAGE_URL;
 const baseURL = import.meta.env.VITE_TMDB_API_URL;
 const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
@@ -209,6 +211,22 @@ class TmdbApiService {
       logger.error(`Error getting trailer for IMDb ID ${imdbId}:`, error);
       throw error;
     }
+  };
+
+  getPosterImage = async (posterPath: string): Promise<Blob> => {
+    const response = await this.apiService.get(
+      `${TMDB_IMAGE_URL}/${posterPath}`,
+      {
+        responseType: 'arraybuffer',
+      },
+    );
+
+    const blob = await compressImageBuffer(
+      response.data as ArrayBuffer,
+      response.headers['content-type'],
+    );
+
+    return blob;
   };
 }
 

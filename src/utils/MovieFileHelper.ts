@@ -100,11 +100,9 @@ export async function compressImageBuffer(
 
       if (!ctx) throw new Error('Could not get canvas context');
 
-      const { width, height } = img;
-
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.drawImage(img, 0, 0);
 
       canvas.toBlob(
         (compressedBlob) => {
@@ -129,6 +127,7 @@ export async function compressImageBuffer(
 
     img.onerror = (err) => {
       URL.revokeObjectURL(imageUrl);
+      logger.error(err);
       reject(err);
     };
   });

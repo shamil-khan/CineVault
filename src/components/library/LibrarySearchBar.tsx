@@ -62,9 +62,7 @@ export const LibrarySearchBar = () => {
     return () => clearTimeout(searchTimer);
   }, [filters.query]);
 
-  const handleSelectMovie = async (
-    tmdbMovie: import('@/services/TmdbApiService').TmdbMovieResult,
-  ) => {
+  const handleSelectMovie = async (tmdbMovie: TmdbMovieResult) => {
     ignoreSearch.current = true; // Prevent search effect from re-opening dropdown
 
     // Check if movie already exists in library (by title match, fuzzy)
@@ -94,14 +92,25 @@ export const LibrarySearchBar = () => {
 
       const movieFromApi = await omdbApiService.getMovieByImdbId(imdbId);
 
-      if (
-        movieFromApi &&
-        movieFromApi.Response === 'True' &&
-        movieFromApi.Poster !== 'N/A'
-      ) {
-        const posterBlob = await utilityApiService.getPosterImage(
-          movieFromApi.Poster,
-        );
+      if (movieFromApi && movieFromApi.Response === 'True') {
+        let posterBlob: Blob | undefined = undefined;
+        if (movieFromApi.Poster !== 'N/A') {
+          posterBlob = await utilityApiService.getPosterImage(
+            movieFromApi.Poster,
+          );
+        } else if (tmdbMovie?.poster_path !== null) {
+          posterBlob = await tmdbApiService.getPosterImage(
+            tmdbMovie.poster_path,
+          );
+          movieFromApi.Poster = `${tmdbMovie.poster_path}`;
+        }
+
+        movieFromApi.Plot =
+          movieFromApi.Plot === 'N/A' ? tmdbMovie.overview : movieFromApi.Plot;
+        movieFromApi.Year =
+          movieFromApi.Year === 'N/A'
+            ? new Date(tmdbMovie.release_date).getFullYear().toString()
+            : movieFromApi.Year;
 
         // Find "Searched" category
         const searchedCategory = categories.find(
@@ -113,11 +122,13 @@ export const LibrarySearchBar = () => {
           title: movieFromApi.Title,
           year: movieFromApi.Year,
           detail: toMovieDetail(movieFromApi),
-          poster: {
-            url: movieFromApi.Poster,
-            mime: posterBlob.type,
-            blob: posterBlob,
-          },
+          poster: posterBlob
+            ? {
+                url: movieFromApi.Poster,
+                mime: posterBlob?.type,
+                blob: posterBlob,
+              }
+            : undefined,
           categories: searchedCategory ? [searchedCategory] : [],
         };
         handleAddMovie(movie);
