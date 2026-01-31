@@ -11,12 +11,26 @@ logger.info(
   `TmdbApiService: apiKey: ${TMDB_API_KEY ? '***configured***' : 'NOT SET'}`,
 );
 
-interface TmdbFindResponse {
-  movie_results: Array<{
-    id: number;
-    title: string;
-    original_title: string;
-  }>;
+interface TmdbFindSimpleResponse {
+  id: number;
+  title: string;
+  original_title: string;
+}
+
+interface TmdbFindDetailResponse {
+  id: number;
+  title: string;
+  original_title: string;
+  adult: boolean;
+  overview: string;
+  poster_path: string;
+  release_date: string;
+}
+
+interface TmdbFindResponse<
+  T extends TmdbFindSimpleResponse | TmdbFindDetailResponse,
+> {
+  movie_results: Array<T>;
 }
 
 interface TmdbVideo {
@@ -123,11 +137,13 @@ class TmdbApiService {
   /**
    * Find TMDb movie ID using IMDb ID
    */
-  private findMovieByImdbId = async (
+  private findMovieByImdbId = async <
+    T extends TmdbFindSimpleResponse | TmdbFindDetailResponse,
+  >(
     imdbId: string,
-  ): Promise<number | null> => {
+  ): Promise<T | null> => {
     try {
-      const response = await this.apiService.get<TmdbFindResponse>(
+      const response = await this.apiService.get<TmdbFindResponse<T>>(
         `/find/${imdbId}`,
         {
           params: {
@@ -141,7 +157,7 @@ class TmdbApiService {
         response.data.movie_results &&
         response.data.movie_results.length > 0
       ) {
-        return response.data.movie_results[0].id;
+        return response.data.movie_results[0];
       }
 
       logger.warn(`No TMDb movie found for IMDb ID: ${imdbId}`);
@@ -180,13 +196,14 @@ class TmdbApiService {
   getTrailerByImdbId = async (imdbId: string): Promise<MovieTrailer | null> => {
     try {
       // Step 1: Find TMDb movie ID
-      const movieId = await this.findMovieByImdbId(imdbId);
-      if (!movieId) {
+      const movie =
+        await this.findMovieByImdbId<TmdbFindSimpleResponse>(imdbId);
+      if (!movie) {
         return null;
       }
 
       // Step 2: Get videos for the movie
-      const videos = await this.getMovieVideos(movieId);
+      const videos = await this.getMovieVideos(movie.id);
 
       // Step 3: Filter for YouTube trailers
       const trailers = videos.filter(
@@ -213,20 +230,29 @@ class TmdbApiService {
     }
   };
 
-  getPosterImage = async (posterPath: string): Promise<Blob> => {
-    const response = await this.apiService.get(
-      `${TMDB_IMAGE_URL}/w342${posterPath}`,
-      {
-        responseType: 'arraybuffer',
-      },
-    );
+  getPosterImage = async (posterPath: string): Promise<[Blob, string]> => {
+    const posterURL = `${TMDB_IMAGE_URL}/w342${posterPath}`;
+    const response = await this.apiService.get(posterURL, {
+      responseType: 'arraybuffer',
+    });
 
     const blob = await compressImageBuffer(
       response.data as ArrayBuffer,
       response.headers['content-type'],
     );
 
-    return blob;
+    return [blob, posterURL];
+  };
+
+  getMovieByImdbId = async (
+    imdbId: string,
+  ): Promise<TmdbMovieResult | null> => {
+    const movie = await this.findMovieByImdbId<TmdbFindDetailResponse>(imdbId);
+    if (!movie) {
+      return null;
+    }
+
+    return movie;
   };
 }
 

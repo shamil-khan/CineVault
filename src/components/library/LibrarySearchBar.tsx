@@ -101,10 +101,11 @@ export const LibrarySearchBar = () => {
             movieFromApi.Poster,
           );
         } else if (tmdbMovie?.poster_path !== null) {
-          posterBlob = await tmdbApiService.getPosterImage(
+          const [blob, posterURL] = await tmdbApiService.getPosterImage(
             tmdbMovie.poster_path,
           );
-          movieFromApi.Poster = `${tmdbMovie.poster_path}`;
+          posterBlob = blob;
+          movieFromApi.Poster = posterURL;
         }
 
         movieFromApi.Plot =

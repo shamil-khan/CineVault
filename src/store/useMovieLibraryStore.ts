@@ -6,6 +6,7 @@ import {
   type MovieInfo,
   type MovieUserStatus,
   type MovieFilterCriteria,
+  type MoviePoster,
 } from '@/models/MovieModel';
 import { movieDbService } from '@/services/MovieDbService';
 import logger from '@/core/logger';
@@ -16,6 +17,13 @@ interface MovieLibraryState {
   filters: MovieFilterCriteria;
   loadMovies: () => Promise<void>;
   addMovie: (movie: MovieInfo) => Promise<void>;
+  updateMovie: (
+    imdbID: string,
+    posterBlob: Blob,
+    posterURL: string,
+    plot: string,
+    year: string,
+  ) => Promise<void>;
   removeMovie: (imdbID: string) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
   removeCategory: (categoryId: number) => Promise<void>;
@@ -122,6 +130,45 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
           });
         } catch (err) {
           logger.error('Failed to add movie:', err);
+        }
+      },
+
+      updateMovie: async (
+        imdbID: string,
+        posterBlob: Blob,
+        posterURL: string,
+        plot: string,
+        year: string,
+      ) => {
+        try {
+          const index = get().movies.findIndex((m) => m.imdbID === imdbID);
+          const movie = get().movies[index];
+          const poster: MoviePoster = {
+            imdbID: movie.imdbID,
+            title: movie.title,
+            url: posterURL,
+            mime: posterBlob.type,
+            blob: posterBlob,
+          };
+
+          const newMovie: MovieInfo = {
+            ...movie,
+            detail: {
+              ...movie.detail,
+              poster: poster.url,
+              plot: plot,
+              year: year,
+            },
+            poster: poster,
+          };
+
+          set((state) => {
+            state.movies[index] = newMovie;
+          });
+          movieDbService.updateMovie(poster, plot, year);
+        } catch (err) {
+          toast.error(`Failed to update movie`);
+          logger.error('Failed to update movie:', err);
         }
       },
 

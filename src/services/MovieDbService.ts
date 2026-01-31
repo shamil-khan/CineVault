@@ -208,6 +208,49 @@ class MovieDbService {
     );
   };
 
+  updateMovie = async (
+    poster: MoviePoster,
+    plot: string,
+    year: string,
+  ): Promise<void> => {
+    await db.transaction('rw', db.movieDetailTable, db.moviePosterTable, () => {
+      // Check and add movie details
+      db.movieDetailTable
+        .where(movieDetailSchema.imdbID)
+        .equals(poster.imdbID)
+        .first()
+        .then((existing) => {
+          if (existing) {
+            db.movieDetailTable.update(existing?.id, {
+              plot: plot,
+              year: year,
+              poster: poster.url,
+            });
+          } else {
+            logger.info(`Movie detail not found for ${poster.imdbID}`);
+          }
+        });
+
+      if (poster) {
+        db.moviePosterTable
+          .where(moviePosterSchema.imdbID)
+          .equals(poster.imdbID)
+          .first()
+          .then((existing) => {
+            if (!existing && poster) {
+              db.moviePosterTable.add({
+                imdbID: poster.imdbID,
+                title: poster.title,
+                url: poster.url || '',
+                mime: poster.mime || '',
+                blob: poster.blob || new Blob(),
+              });
+            }
+          });
+      }
+    });
+  };
+
   deleteMovie = async (imdbID: string): Promise<void> => {
     await db.transaction(
       'rw',

@@ -12,6 +12,7 @@ interface ActionTooltipProps {
   children: React.ReactNode;
   variant?:
     | 'default'
+    | 'blue'
     | 'emerald'
     | 'indigo'
     | 'rose'
@@ -30,6 +31,7 @@ export const ActionTooltip = ({
   // Define glow styles for 2026 aesthetic
   const variants = {
     default: 'border-white/20 bg-black/80 shadow-white/5',
+    blue: 'border-blue-600 bg-blue-50 text-blue-600 shadow-blue-200/50',
     emerald:
       'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-emerald-200/50',
     indigo:

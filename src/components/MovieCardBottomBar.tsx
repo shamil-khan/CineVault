@@ -1,10 +1,12 @@
 import { type MovieInfo } from '@/models/MovieModel';
-import { Trash2, Heart, Eye, Tag } from 'lucide-react';
+import { Trash2, Heart, Eye, Tag, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMovieLibrary } from '@/hooks/useMovieLibrary';
 import { ActionTooltip } from './ActionTooltip';
 import { cn } from '@/lib/utils';
+import { tmdbApiService } from '@/services/TmdbApiService';
+import { toast } from 'sonner';
 
 interface MovieCardBottomBarProps {
   movie: MovieInfo;
@@ -16,10 +18,37 @@ export const MovieCardBottomBar = ({
   onCategoryOpen,
 }: MovieCardBottomBarProps) => {
   const {
+    updateMovie,
     handleRemoveMovie,
     handleToggleMovieFavorite,
     handleToggleMovieWatched,
   } = useMovieLibrary();
+
+  const loadPoster = async (movie: MovieInfo) => {
+    const tmdbMovie = await tmdbApiService.getMovieByImdbId(movie.imdbID);
+    if (tmdbMovie === null) {
+      toast.info(`${movie.title} does not exists in TMDB`);
+      return;
+    }
+    if (!tmdbMovie.poster_path) {
+      toast.info(
+        `${movie.title} has not valid poster ${tmdbMovie.poster_path} in TMDB`,
+      );
+      return;
+    }
+    const [posterBlob, posterURL] = await tmdbApiService.getPosterImage(
+      tmdbMovie.poster_path,
+    );
+    const plot =
+      movie.detail.plot === 'N/A' ? tmdbMovie.overview : movie.detail.plot;
+    const year =
+      movie.detail.year === 'N/A'
+        ? new Date(tmdbMovie.release_date).getFullYear().toString()
+        : movie.detail.year;
+
+    await updateMovie(movie.imdbID, posterBlob, posterURL, plot, year);
+    toast.success(`${movie.title} loaded from TMDB`);
+  };
 
   return (
     <div
@@ -38,6 +67,21 @@ export const MovieCardBottomBar = ({
 
       <TooltipProvider>
         <div className='flex w-full justify-around items-center max-w-sm mx-auto gap-1'>
+          {!movie.poster && (
+            <ActionTooltip label='Load from TMDB' variant='blue'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-10 w-10 rounded-xl bg-blue-100/70 hover:bg-blue-200 active:scale-90 active:bg-blue-500/20 transition-all'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loadPoster(movie);
+                }}>
+                <RefreshCw className='w-5 h-5 text-blue-600' />
+              </Button>
+            </ActionTooltip>
+          )}
+
           {/* 1. FAVORITE - Rose Pulse */}
           <ActionTooltip
             label={
