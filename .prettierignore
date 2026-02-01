@@ -3,6 +3,7 @@
 **/.git
 **/node_modules
 **/dist
+**/public
 bun.lock
 pnpm-lock.yaml
 readme.md

@@ -1,0 +1,19 @@
+{
+  "name": "69928571-361c-4fc6-b717-f8201644197c-fotor-bg-remover-20260201175413",
+  "short_name": "69928571-361c-4fc6-b717-f8201644197c-fotor-bg-remover-20260201175413",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
