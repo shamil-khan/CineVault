@@ -8,13 +8,16 @@ import { useMovieFilters } from '@/hooks/useMovieFilters';
 import { LibraryHeader } from '@/components/library/LibraryHeader';
 import { MovieGallery } from '@/components/MovieGallery';
 import { CategoryDialog } from '@/components/CategoryDialog';
+import { About } from '@/components/About';
 import { APP_TITLE, pluralName } from '@/utils/Helper';
+import { Button } from './components/ui/button';
 
 function App() {
   const { movies, loadMovies } = useMovieLibrary();
   const { hasActiveFilters, filteredMovies } = useMovieFilters();
   const appRef = useRef(false);
   const [loaded, setLoaded] = useState<boolean>(false);
+  const [aboutVisible, setAboutVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (appRef.current) {
@@ -42,6 +45,10 @@ function App() {
     );
   }
 
+  if (aboutVisible) {
+    return <About onClose={() => setAboutVisible(false)} />;
+  }
+
   return (
     <ErrorBoundary>
       <div className='p-1 w-full'>
@@ -54,6 +61,9 @@ function App() {
           <h3 className='text-2xl font-bold'>
             {APP_TITLE} has ({movies.length}) {pluralName(movies, 'movie')}
           </h3>
+          <Button variant='ghost' onClick={() => setAboutVisible(true)}>
+            About
+          </Button>
         </div>
         {hasActiveFilters && (
           <h6 className='text-md text-muted-foreground font-medium'>
