@@ -27,6 +27,7 @@ export const LibrarySearchBar = () => {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
   const ignoreSearch = useRef(false);
+  const manualChanged = useRef(false);
 
   const onQueryChange = (query: string) => {
     onFiltersUpdated({ ...filters, query: query });
@@ -43,6 +44,10 @@ export const LibrarySearchBar = () => {
 
   // Fetch TMDB suggestions based on filters.query
   useEffect(() => {
+    if (manualChanged.current) {
+      manualChanged.current = false;
+      return;
+    }
     if (ignoreSearch.current) {
       ignoreSearch.current = false;
       return;
@@ -69,14 +74,14 @@ export const LibrarySearchBar = () => {
 
   const handleSelectMovie = async (tmdbMovie: TmdbMovieResult) => {
     ignoreSearch.current = true;
-    setShowDropdown(false);
     onQueryChange(tmdbMovie.title);
+    setShowDropdown(false);
 
-    const existingMovie = movies.find(
-      (m) => m.title.toLowerCase() === tmdbMovie.title.toLowerCase(),
-    );
-
-    if (existingMovie) {
+    if (
+      movies.findIndex(
+        (m) => m.title.toLowerCase() === tmdbMovie.title.toLowerCase(),
+      ) !== -1
+    ) {
       toast.info(`"${tmdbMovie.title}" already exists in your library.`);
       return;
     }
@@ -92,8 +97,19 @@ export const LibrarySearchBar = () => {
         return;
       }
 
-      if (movies.findIndex((m) => m.imdbID === imdbId) !== -1) {
-        toast.info(`"${tmdbMovie.title}" already exists in your library.`);
+      const imdbIndex = movies.findIndex((m) => m.imdbID === imdbId);
+      if (imdbIndex !== -1) {
+        toast.info(
+          `"${movies[imdbIndex].title}" already exists in your library.`,
+        );
+        if (
+          movies[imdbIndex].title.toLowerCase() !==
+          tmdbMovie.title.toLowerCase()
+        ) {
+          manualChanged.current = true;
+          onQueryChange(movies[imdbIndex].title);
+          setShowDropdown(false);
+        }
         return;
       }
 
@@ -101,6 +117,12 @@ export const LibrarySearchBar = () => {
       if (!imdbMovie || imdbMovie.Response === OmdbApi.ReservedWords.False) {
         toast.info(`"${tmdbMovie.title}" IMDB information is not available.`);
         return;
+      }
+
+      if (imdbMovie.Title.toLowerCase() !== tmdbMovie.title.toLowerCase()) {
+        manualChanged.current = true;
+        onQueryChange(imdbMovie.Title);
+        setShowDropdown(false);
       }
 
       const posterURL =
@@ -119,7 +141,6 @@ export const LibrarySearchBar = () => {
           ? new Date(tmdbMovie.release_date).getFullYear().toString()
           : imdbMovie.Year;
 
-      // Find "Searched" category
       const searchedCategory = categories.find(
         (c) => c.name === SYSTEM_CATEGORY_SEARCHED,
       );
@@ -139,8 +160,9 @@ export const LibrarySearchBar = () => {
         categories: searchedCategory ? [searchedCategory] : [],
       };
       handleAddMovie(movie);
+
       toast.success(
-        `Movie added to library${
+        `"${movie.title}" added to library${
           searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
         }`,
       );
