@@ -1,73 +1,152 @@
-# React + TypeScript + Vite
+# 🎬 CineVault
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### _The Ultimate Effortless Local-First Cinematic Intelligence Movie Management & Discovery_
 
-Currently, two official plugins are available:
+[![License: AGPL v3](https://img.shields.io)](https://www.gnu.org)
+[![Built with React](https://img.shields.io)](https://react.dev)
+[![Powered by Vite](https://img.shields.io)](https://vitejs.dev)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**#CineVault** CineVault is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering, CineVault transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection.Built for cross-platform compatibility, CineVault supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Key Innovations
 
-## Expanding the ESLint configuration
+## 🧠 Intelligent Parsing & Ingestion
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Deep Folder Scanning:###
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Upload entire directories or nested folders. CineStack recursively hunts for media.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Precision Filtering:###
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+Automatically ignores system junk, keeping only mp4, mkv, avi, and other high-quality formats.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Regex-Powered Titling:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+Smartly extracts Title + Year from messy filenames for 99% metadata accuracy.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+---
+
+## ⭐ Key Features
+
+- ✅ **Centralized Library:** Upload local movie files & folders (including nested folders) with smart file-title parsing.
+- ✅ **Dynamic Categorization:** Automatic 'Uploaded' and 'Searched' categories, plus unlimited custom user-managed categories.
+- ✅ **Intelligent Metadata Fetching:** Enrich your local titles with details, posters, and trailers from IMDB and TMDB.
+- ✅ **Visual Status Flags:** Green (success), Red (failure), Blue (already in library) for processing results.
+- ✅ **Advanced Filtering:** Sort by genre, year, rating spans (e.g., `7.0-7.4`), languages, favorites, and watch status.
+- ✅ **Offline Access:** Enjoy your entire aggregation group without internet access once data is fetched.
+- ✅ **Deep Search:** Local library search with fallback to YouTube trailer integration and TMDB exploration for new discoveries.
+- ✅ **Flexible Management:** Link/unlink movies to categories, mark as favorite or watched, and remove entries.
+
+---
+
+## 🛠️ Technologies
+
+| Category      | Technology                                                                                     | Purpose                                  |
+| :------------ | :--------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| **Core**      | ![Vite](https://img.shields.io) ![React](https://img.shields.io) ![TS](https://img.shields.io) | Modern build setup and type safety.      |
+| **Styling**   | ![Tailwind](https://img.shields.io) ![Shadcn](https://img.shields.io)                          | Utility-first CSS and component library. |
+| **State**     | ![Zustand](https://img.shields.io) ![Immer](https://img.shields.io)                            | Optimized state management.              |
+| **Data**      | ![Dexie](https://img.shields.io)                                                               | IndexedDB wrapper for offline storage.   |
+| **Network**   | ![Axios](https://img.shields.io)                                                               | HTTP client for data fetching.           |
+| **Dev Tools** | ![ESLint](https://img.shields.io) ![Prettier](https://img.shields.io)                          | Code quality and formatting standards.   |
+| **Logging**   | ![Consola](https://img.shields.io) ![Chalk](https://img.shields.io)                            | Terminal logging utilities.              |
+
+---
+
+## ⚙️ Installation & Local Setup
+
+To get #CineVault running on your local machine for development or self-hosting, follow these steps:
+
+1.  **Clone the Repository:**
+
+    ```bash
+    git clone git@github.com:shamil-khan/local-movies.git
+    cd local-movies
+    ```
+
+    or
+
+    ```bash
+    git clone https://github.com/shamil-khan/local-movies.git
+    cd local-movies
+    ```
+
+2.  **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+    or
+
+    ```bash
+    pnpm install
+    ```
+
+3.  **Run Locally:**
+    After running following. Open your browser to `http://localhost:6601`.
+
+    ```bash
+    npm run dev
+    ```
+
+    or
+
+    ```bash
+    pnpm run dev
+    ```
+
+4.  **Deploy Locally:**
+
+    ```bash
+    npm run build
+    ```
+
+    or
+
+    ```bash
+    pnpm run build
+    ```
+
+5.  **Preview Locally:**
+    After running following Open your browser to `http://localhost:6602`.
+
+    ```bash
+    npm run preview
+    ```
+
+    or
+
+    ```bash
+    pnpm run preview
+    ```
+
+## Deployment
+
+Deploy to any static hosting service like Vercel, Netlify, or GitHub Pages. For - PWA features:Ensure HTTPS is enabled on your host.
+
+- The app includes a manifest.json with icons for installation.
+
+## 📱 PWA (Progressive Web App) Installation
+
+#CineVault is a fully functional **PWA**, installable on your mobile devices just like a native app!
+
+### Installing on Mobile Devices
+
+| Platform         | Instructions                                                                                                                                                                                                                                            | Icon                                    |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------- |
+| **iPhone (iOS)** | 1. Open Safari and navigate to the live URL.<br>2. Tap the **Share** icon.<br>3. Select **"Add to Home Screen"**.<br>4. Tap **"Add"** in the top right corner.                                                                                          | ![iOS Icon](https://img.shields.io)     |
+| **Android**      | 1. Open Chrome and navigate to the live URL.<br>2. Tap the **three-dots menu** (⋮).<br>3. Select **"Install app"** or **"Add to Home screen"**.<br>4. Tap **"Install"**.<br>(_Ensure you have PWA support enabled in your browser settings if needed._) | ![Android Icon](https://img.shields.io) |
+
+---
+
+## ⚖️ License & Contributing
+
+We welcome contributions! Please see `CONTRIBUTING.md` for details. Please fork the repository and submit a pull request. Ensure code adheres to ESLint and Prettier standards.
+This project is licensed under the **GNU Affero General Public License v3** (AGPL-3.0-or-later).
+
+**Copyright © 2026 Shamil Ahmed (aka Shamil Khan) <shamil.ahmed@gmail.com>**
+
+---
