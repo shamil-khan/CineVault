@@ -75,15 +75,15 @@ To get **#Cine Vault** running on your local machine for development or self-hos
 1.  **Clone the Repository:**
 
     ```bash
-    git clone git@github.com:shamil-khan/local-movies.git
-    cd local-movies
+    git clone git@github.com:shamil-khan/CineVault.git
+    cd CineVault
     ```
 
     or
 
     ```bash
-    git clone https://github.com/shamil-khan/local-movies.git
-    cd local-movies
+    git clone https://github.com/shamil-khan/CineVault.git
+    cd CineVault
     ```
 
 2.  **Install Dependencies:**
