@@ -2,9 +2,9 @@
 
 ### _The Ultimate Effortless Local-First Cinematic Intelligence Movie Management & Discovery_
 
-[![Static Badge](https://img.shields.io/badge/License%3A-AGPL_v3-blue?style=plastic&logo=github)](https://www.gnu.org)
-[![Static Badge](https://img.shields.io/badge/Built_with-React-blue?style=plastic&logo=react)](https://react.dev)
-[![Static Badge](https://img.shields.io/badge/Powered_by-Vite-blue?style=plastic&logo=vite)](https://vitejs.dev)
+[![Static Badge](https://img.shields.io/badge/License%3A-AGPL_v3-red?style=for-the-badge&logo=github)](https://www.gnu.org)
+[![Static Badge](https://img.shields.io/badge/Built_with-React-blue?style=for-the-badge&logo=react)](https://react.dev)
+[![Static Badge](https://img.shields.io/badge/Powered_by-Vite-blue?style=for-the-badge&logo=vite)](https://vitejs.dev)
 
 **#CineVault** CineVault is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering, CineVault transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection.Built for cross-platform compatibility. CineVault supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
 
@@ -56,15 +56,15 @@
 
 ## 🛠️ Technologies
 
-| Category      | Technology                             | Purpose                                  |
-| :------------ | :------------------------------------- | :--------------------------------------- |
-| **Core**      | [Vite] + [React] + [TypeScript]        | Modern build setup and type safety.      |
-| **Styling**   | [TailwindV4] + [Shadcn]                | Utility-first CSS and component library. |
-| **State**     | [Zustand] + [Immer]                    | Optimized state management.              |
-| **Data**      | ![Dexie Badge](https://img.shields.io) | IndexedDB wrapper for offline storage.   |
-| **Network**   | [Axios]                                | HTTP client for data fetching.           |
-| **Dev Tools** | [ESLint] + [Prettier]                  | Code quality and formatting standards.   |
-| **Logging**   | [Consola] + [Chalk]                    | Terminal logging utilities.              |
+| Category      | Technology                                                                                                                                                                                                                                                                                                                    | Purpose                                  |
+| :------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------- |
+| **Core**      | ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E) ![React](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) | Modern build setup and type safety.      |
+| **Styling**   | ![TailwindV4](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Shadcn](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)                                                                                            | Utility-first CSS and component library. |
+| **State**     | [Zustand] + [Immer]                                                                                                                                                                                                                                                                                                           | Optimized state management.              |
+| **Data**      | ![Dexie Badge](https://img.shields.io)                                                                                                                                                                                                                                                                                        | IndexedDB wrapper for offline storage.   |
+| **Network**   | ![Axios](https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white)                                                                                                                                                                                                                           | HTTP client for data fetching.           |
+| **Dev Tools** | ![ESLint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E)                                                                                                            | Code quality and formatting standards.   |
+| **Logging**   | [Consola] + [Chalk]                                                                                                                                                                                                                                                                                                           | Terminal logging utilities.              |
 
 ---
 
