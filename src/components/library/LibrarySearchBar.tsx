@@ -16,6 +16,7 @@ import { useMovieLibrary } from '@/hooks/useMovieLibrary';
 import { toMovieDetail } from '@/utils/MovieFileHelper';
 import { logger } from '@/core/logger';
 import { cn } from '@/lib/utils';
+import { APP_TITLE } from '@/utils/Helper';
 
 const TMDB_IMAGE_URL = import.meta.env.VITE_TMDB_IMAGE_URL;
 
@@ -82,7 +83,7 @@ export const LibrarySearchBar = () => {
         (m) => m.title.toLowerCase() === tmdbMovie.title.toLowerCase(),
       ) !== -1
     ) {
-      toast.info(`"${tmdbMovie.title}" already exists in your library.`);
+      toast.info(`"${tmdbMovie.title}" already exists in ${APP_TITLE}.`);
       return;
     }
 
@@ -100,7 +101,7 @@ export const LibrarySearchBar = () => {
       const imdbIndex = movies.findIndex((m) => m.imdbID === imdbId);
       if (imdbIndex !== -1) {
         toast.info(
-          `"${movies[imdbIndex].title}" already exists in your library.`,
+          `"${movies[imdbIndex].title}" already exists in ${APP_TITLE}.`,
         );
         if (
           movies[imdbIndex].title.toLowerCase() !==
@@ -162,7 +163,7 @@ export const LibrarySearchBar = () => {
       handleAddMovie(movie);
 
       toast.success(
-        `"${movie.title}" added to library${
+        `"${movie.title}" added to ${APP_TITLE}${
           searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
         }`,
       );

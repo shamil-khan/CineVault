@@ -8,9 +8,7 @@ import { useMovieFilters } from '@/hooks/useMovieFilters';
 import { LibraryHeader } from '@/components/library/LibraryHeader';
 import { MovieGallery } from '@/components/MovieGallery';
 import { CategoryDialog } from '@/components/CategoryDialog';
-import { pluralName } from '@/utils/Helper';
-
-const APP_TITLE = import.meta.env.VITE_APP_TITLE;
+import { APP_TITLE, pluralName } from '@/utils/Helper';
 
 function App() {
   const { movies, loadMovies } = useMovieLibrary();
@@ -39,7 +37,7 @@ function App() {
     return (
       <div className='flex items-center justify-center h-screen'>
         <Spinner className='h-10 w-10 text-blue-600' />
-        <span className='font-bold'>Loading {APP_TITLE} Library </span>
+        <span className='font-bold'>Loading {APP_TITLE}</span>
       </div>
     );
   }
@@ -48,7 +46,7 @@ function App() {
     <ErrorBoundary>
       <div className='p-1 w-full'>
         <h3 className='text-2xl font-bold'>
-          {APP_TITLE} Library has {movies.length} {pluralName(movies, 'movie')}
+          {APP_TITLE} has ({movies.length}) {pluralName(movies, 'movie')}
         </h3>
         {hasActiveFilters && (
           <h6 className='text-md text-muted-foreground font-medium'>
@@ -63,7 +61,7 @@ function App() {
         <div className='flex h-64 items-center justify-center '>
           <div className='relative flex rounded-full'>
             <div className='animate-pulse text-3xl font-semibold'>
-              There is no movie in Local Library.
+              There is no movie in {APP_TITLE}.
             </div>
           </div>
         </div>

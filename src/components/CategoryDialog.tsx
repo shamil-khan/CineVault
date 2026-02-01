@@ -16,6 +16,7 @@ import {
   SYSTEM_CATEGORY_UPLOADED,
 } from '@/services/MovieDbService';
 import { cn } from '@/lib/utils';
+import { APP_TITLE } from '@/utils/Helper';
 
 export const CategoryDialog = () => {
   const { isOpen, close, selectedMovie } = useCategoryDialog();
@@ -105,7 +106,7 @@ export const CategoryDialog = () => {
           <DialogDescription>
             {activeMovie
               ? 'Select categories to assign to this movie, or create new ones.'
-              : 'Create and manage categories for your library.'}
+              : `Create and manage categories for ${APP_TITLE}.`}
           </DialogDescription>
         </DialogHeader>
 

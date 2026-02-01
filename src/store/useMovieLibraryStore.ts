@@ -10,6 +10,7 @@ import {
 } from '@/models/MovieModel';
 import { movieDbService } from '@/services/MovieDbService';
 import logger from '@/core/logger';
+import { APP_TITLE } from '@/utils/Helper';
 
 interface MovieLibraryState {
   movies: MovieInfo[];
@@ -324,11 +325,11 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
             movies: [],
             categories: categories,
           });
-          toast.success('Library deleted successfully');
+          toast.success(`${APP_TITLE} deleted successfully`);
           return true;
         } catch (err) {
-          logger.error('Failed to clear library:', err);
-          toast.error('Failed to clear library');
+          logger.error(`Failed to clear ${APP_TITLE}:`, err);
+          toast.error(`Failed to clear ${APP_TITLE}`);
           return false;
         }
       },

@@ -13,6 +13,7 @@ import {
   isMovieInStatus,
 } from '@/components/library/FileProcessingHeader';
 import { cn } from '@/lib/utils';
+import { APP_TITLE } from '@/utils/Helper';
 
 interface FileProcessingEntriesListProps {
   status: FileProcessingStatusType;
@@ -44,7 +45,7 @@ export const FileProcessingEntriesList = ({
 
     if (movie.inDb) {
       return {
-        message: `The movie already exists in library ${movie.poster ? 'with poster.' : 'but has no poster.'}`,
+        message: `The movie already exists in ${APP_TITLE} ${movie.poster ? 'with poster.' : 'but has no poster.'}`,
         detail: JSON.stringify(movie.detail, null, 2),
       };
     }

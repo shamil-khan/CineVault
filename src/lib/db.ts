@@ -44,7 +44,7 @@ logger.info(`MovieUserStatus Schema: ${movieStatusSchemaStr}`);
 logger.info(`Category Schema: ${categorySchemaStr}`);
 logger.info(`MovieCategory Schema: ${movieCategorySchemaStr}`);
 
-export class LocalMovieAppDB extends Dexie {
+export class CineVaultAppDB extends Dexie {
   movieDetailTable!: EntityTable<MovieDetailWithId, 'id'>;
   moviePosterTable!: EntityTable<MoviePosterWithId, 'id'>;
   movieUserStatusTable!: EntityTable<MovieUserStatusWithId, 'id'>;
@@ -52,7 +52,7 @@ export class LocalMovieAppDB extends Dexie {
   movieCategoryTable!: EntityTable<MovieCategoryWithId, 'id'>;
 
   constructor() {
-    super('LocalMovieAppDB');
+    super('CineVault');
 
     this.version(0.1).stores({
       movieDetailTable: `++id, ${movieDetailSchemaStr}`,
@@ -62,8 +62,8 @@ export class LocalMovieAppDB extends Dexie {
       movieCategoryTable: `++id, ${movieCategorySchemaStr}, [${movieCategorySchema.imdbID}+${movieCategorySchema.categoryId}]`,
     });
 
-    logger.success('LocalMovieAppDB created successfully');
+    logger.success('CineVault DB created successfully');
   }
 }
 
-export const db = new LocalMovieAppDB();
+export const db = new CineVaultAppDB();

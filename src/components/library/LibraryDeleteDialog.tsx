@@ -16,6 +16,7 @@ import { ActionTooltip } from '@/components/ActionTooltip';
 import { useMovieLibrary } from '@/hooks/useMovieLibrary';
 import { useMovieProcessor } from '@/hooks/useMovieProcessor';
 import { cn } from '@/lib/utils';
+import { APP_TITLE } from '@/utils/Helper';
 
 export const LibraryDeleteDialog = () => {
   const { categories, handleClearLibrary } = useMovieLibrary();
@@ -31,7 +32,7 @@ export const LibraryDeleteDialog = () => {
   return (
     <Dialog>
       <TooltipProvider>
-        <ActionTooltip label='Delete Library' variant='destructive'>
+        <ActionTooltip label={`Delete ${APP_TITLE}`} variant='destructive'>
           <DialogTrigger asChild>
             <Button
               variant='ghost'
@@ -41,7 +42,7 @@ export const LibraryDeleteDialog = () => {
                 'bg-red-500/10 border border-red-500/20 active:bg-red-500/30',
                 'active:scale-90 transition-all',
               )}
-              title='Delete Library'>
+              title={`Delete ${APP_TITLE}`}>
               <Trash2
                 className='w-5 h-5 text-red-600 group-hover:text-white 
                drop-shadow-[0_2px_4px_rgba(220,38,38,0.25)] 
@@ -54,7 +55,7 @@ export const LibraryDeleteDialog = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2 text-destructive'>
-            <AlertOctagon className='h-5 w-5' /> Delete Library?
+            <AlertOctagon className='h-5 w-5' /> Delete {APP_TITLE}?
           </DialogTitle>
           <DialogDescription>
             This will permanently delete ALL movies, files, and posters from
@@ -64,7 +65,7 @@ export const LibraryDeleteDialog = () => {
         {categories.length > 0 && (
           <div className='mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 max-h-40 overflow-y-auto'>
             <p className='mb-2 text-xs font-medium text-destructive'>
-              Categories in your library
+              Categories in {APP_TITLE}
             </p>
             <ul className='space-y-1 text-xs'>
               {categories.map((category) => (
