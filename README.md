@@ -4,27 +4,40 @@
 
 [![License: AGPL v3](https://img.shields.io)](https://www.gnu.org)
 [![Built with React](https://img.shields.io)](https://react.dev)
-[![Powered by Vite](https://img.shields.io)](https://vitejs.dev)
+[![Powered by Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 
-**#CineVault** CineVault is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering, CineVault transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection.Built for cross-platform compatibility, CineVault supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
+**#CineVault** CineVault is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering, CineVault transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection.Built for cross-platform compatibility. CineVault supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
 
 ---
 
 ## 🚀 Key Innovations
 
-## 🧠 Intelligent Parsing & Ingestion
+### 🧠 Intelligent Parsing & Ingestion
 
-### Deep Folder Scanning:###
+- **Deep Folder Scanning:** Upload entire directories or nested folders. CineStack recursively hunts for media.
 
-Upload entire directories or nested folders. CineStack recursively hunts for media.
+- **Precision Filtering:** Automatically ignores system junk, keeping only mp4, mkv, avi, and other high-quality formats.
 
-### Precision Filtering:###
+- **Regex-Powered Titling:** Smartly extracts Title + Year from messy filenames for 99% metadata accuracy.
 
-Automatically ignores system junk, keeping only mp4, mkv, avi, and other high-quality formats.
+### 🔍 Metadata Orchestration
 
-### Regex-Powered Titling:
+- **Hybrid Fetching:** Pulls exhaustive details (Genre, Rating, Language, Country) from IMDB.
 
-Smartly extracts Title + Year from messy filenames for 99% metadata accuracy.
+- **Visual Fallbacks:** If IMDB lacks high-res posters, CineStack automatically hot-swaps to TMDB to ensure your library looks stunning.
+
+- **Status Tracking:** Real-time visual feedback with color-coded flags:
+  - 🟢 Success: Metadata & Poster secured.
+  - 🔴 Failure: Action required.
+  - 🔵 Duplicate: Already in your vault.
+
+### 🎭 Deep Library Management
+
+- **Dynamic Accumulation:** Filters aren't hardcoded; they adapt to your library. Ratings are grouped (e.g., 7.5-7.9) and years are stacked in 5-year spans for ergonomic browsing.
+
+- **Custom Taxonomy:** Create, rename, and link movies to unlimited custom categories.
+
+- **Watch Status:** One-click toggles for Watched (👁️) and Favorites (❤️) with integrated global filtering.
 
 ---
 
