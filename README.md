@@ -1,12 +1,12 @@
-# 🎬 CineVault
+# 🎬 Cine Vault
 
 ### _The Ultimate Effortless Local-First Cinematic Intelligence Movie Management & Discovery_
 
 [![Static Badge](https://img.shields.io/badge/License%3A-AGPL_v3-red?style=for-the-badge&logo=github)](https://www.gnu.org)
-[![Static Badge](https://img.shields.io/badge/Built_with-React-blue?style=for-the-badge&logo=react)](https://react.dev)
-[![Static Badge](https://img.shields.io/badge/Powered_by-Vite-blue?style=for-the-badge&logo=vite)](https://vitejs.dev)
+[![Static Badge](https://img.shields.io/badge/Built_with-React-189AD3?style=for-the-badge&logo=react)](https://react.dev)
+[![Static Badge](https://img.shields.io/badge/Powered_by-Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev)
 
-**#CineVault** CineVault is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering, CineVault transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection.Built for cross-platform compatibility. CineVault supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
+**Cine Vault** is a cutting-edge Progressive Web App (PWA) designed to empower movie enthusiasts with seamless management of their personal film collections. By intelligently parsing local movie files, fetching enriched metadata from premier sources like IMDb and TMDB, and offering advanced categorization and filtering. **Cine Vault** transforms scattered downloads into a curated, offline-accessible cinematic repository. Whether you're archiving classics or discovering hidden gems, this app delivers a mind-blowing experience that blends local storage efficiency with global database insights—ensuring your library is always at your fingertips, even without an internet connection. Built for cross-platform compatibility which includes supports iOS and Android devices, allowing effortless installation as a native-like app directly from your browser.
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 🧠 Intelligent Parsing & Ingestion
 
-- **Deep Folder Scanning:** Upload entire directories or nested folders. CineStack recursively hunts for media.
+- **Deep Folder Scanning:** Upload entire directories or nested folders. Cine Vault recursively hunts for media.
 
 - **Precision Filtering:** Automatically ignores system junk, keeping only mp4, mkv, avi, and other high-quality formats.
 
@@ -24,7 +24,7 @@
 
 - **Hybrid Fetching:** Pulls exhaustive details (Genre, Rating, Language, Country) from IMDB.
 
-- **Visual Fallbacks:** If IMDB lacks high-res posters, CineStack automatically hot-swaps to TMDB to ensure your library looks stunning.
+- **Visual Fallbacks:** If IMDB lacks high-res posters, Cine Vault automatically hot-swaps to TMDB to ensure your library looks stunning.
 
 - **Status Tracking:** Real-time visual feedback with color-coded flags:
   - 🟢 Success: Metadata & Poster secured.
@@ -58,20 +58,19 @@
 
 | Category                               | Technology                                                                                                                                                                                                                                                                                                                    | Purpose                                  |
 | :------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------- |
-| **Core**                               | ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E) ![React](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) | Modern build setup and type safety.      |
+| **Core**                               | ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E) ![React](https://img.shields.io/badge/React-1C2951?style=for-the-badge&logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) | Modern build setup and type safety.      |
 | **Styling**                            | ![TailwindV4](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Shadcn](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)                                                                                            | Utility-first CSS and component library. |
-| **State**                              | ![Zustand](https://img.shields.io🐻&logoColor=white) ![Immer](https://img.shields.io)                                                                                                                                                                                                                                         | Optimized state management.              |
-| **Data**                               | [![Dexie.js](https://img.shields.io/badge/Dexie-JS-blue.svg?logo=appveyor)](https://dexie.org)                                                                                                                                                                                                                                |
-| IndexedDB wrapper for offline storage. |
+| **State**                              |[![Zustand](https://img.shields.io/badge/Zustand-F7A41D?style=for-the-badge&logo=zig&logoColor=white)](https://zustand.docs.pmnd.rs/) [![Immer](https://img.shields.io/badge/immer-D62300.svg?style=for-the-badge&logo=immer&logoColor=white)](https://immerjs.github.io/immer/)                                                                                                                                                                                                                                         | Optimized state management.              |
+| **Data** | [![Dexie.js](https://img.shields.io/badge/Dexie-JS-blue.svg?style=for-the-badge&logo=InfluxDB&logoColor=white)](https://dexie.org) | IndexedDB wrapper for offline storage.
 | **Network**                            | ![Axios](https://img.shields.io/badge/axios-671ddf?&style=for-the-badge&logo=axios&logoColor=white)                                                                                                                                                                                                                           | HTTP client for data fetching.           |
 | **Dev Tools**                          | ![ESLint](https://img.shields.io/badge/eslint-3A33D1?style=for-the-badge&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/prettier-1A2C34?style=for-the-badge&logo=prettier&logoColor=F7BA3E)                                                                                                            | Code quality and formatting standards.   |
-| **Logging**                            | ![Console Icon](https://skillicons.dev) + [Chalk]                                                                                                                                                                                                                                                                             | Terminal logging utilities.              |
+| **Logging**                            | ![Consola](https://img.shields.io/badge/Consola-800000?style=for-the-badge&logo=scrimba&logoColor=white) ![Chalk](https://img.shields.io/badge/Chalk-CD5C5C?style=for-the-badge&logo=proto.io&logoColor=white)                                                                                                                                                                                                                                                                             | Terminal logging utilities.              |
 
 ---
 
 ## ⚙️ Installation & Local Setup
 
-To get #CineVault running on your local machine for development or self-hosting, follow these steps:
+To get **#Cine Vault** running on your local machine for development or self-hosting, follow these steps:
 
 1.  **Clone the Repository:**
 
@@ -137,7 +136,7 @@ To get #CineVault running on your local machine for development or self-hosting,
     pnpm run preview
     ```
 
-## Deployment
+## ☁ Deployment
 
 Deploy to any static hosting service like Vercel, Netlify, or GitHub Pages. For - PWA features:Ensure HTTPS is enabled on your host.
 
@@ -145,14 +144,14 @@ Deploy to any static hosting service like Vercel, Netlify, or GitHub Pages. For 
 
 ## 📱 PWA (Progressive Web App) Installation
 
-#CineVault is a fully functional **PWA**, installable on your mobile devices just like a native app!
+**Cine Vault** is a fully functional **PWA**, installable on your mobile devices just like a native app!
 
 ### Installing on Mobile Devices
 
 | Platform         | Instructions                                                                                                                                                                                                                                            | Icon                                    |
 | :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------- |
-| **iPhone (iOS)** | 1. Open Safari and navigate to the live URL.<br>2. Tap the **Share** icon.<br>3. Select **"Add to Home Screen"**.<br>4. Tap **"Add"** in the top right corner.                                                                                          | ![iOS Icon](https://img.shields.io)     |
-| **Android**      | 1. Open Chrome and navigate to the live URL.<br>2. Tap the **three-dots menu** (⋮).<br>3. Select **"Install app"** or **"Add to Home screen"**.<br>4. Tap **"Install"**.<br>(_Ensure you have PWA support enabled in your browser settings if needed._) | ![Android Icon](https://img.shields.io) |
+| **iPhone (iOS)** | 1. Open Safari and navigate to the live URL.<br>2. Tap the **Share** icon.<br>3. Select **"Add to Home Screen"**.<br>4. Tap **"Add"** in the top right corner.                                                                                          | ![iOS Icon](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)     |
+| **Android**      | 1. Open Chrome and navigate to the live URL.<br>2. Tap the **three-dots menu** (⋮).<br>3. Select **"Install app"** or **"Add to Home screen"**.<br>4. Tap **"Install"**.<br>(_Ensure you have PWA support enabled in your browser settings if needed._) | ![Android Icon](https://img.shields.io/badge/Android-00979D?style=for-the-badge&logo=android-studio&logoColor=white) |
 
 ---
 
