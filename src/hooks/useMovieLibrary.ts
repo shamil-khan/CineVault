@@ -16,6 +16,13 @@ export const useMovieLibrary = () => {
     removeMovieFromCategory,
     toggleMovieFavorite,
     toggleMovieWatched,
+    selectedMovieIds,
+    toggleMovieSelection,
+    selectAllMovies,
+    clearSelection,
+    batchDeleteMovies,
+    batchAddMoviesToCategory,
+    batchRemoveMoviesFromCategory,
     clearStore,
   } = useMovieLibraryStore();
 
@@ -34,6 +41,13 @@ export const useMovieLibrary = () => {
     handleRemoveMovieFromCategory: removeMovieFromCategory,
     handleToggleMovieFavorite: toggleMovieFavorite,
     handleToggleMovieWatched: toggleMovieWatched,
+    selectedMovieIds,
+    handleToggleMovieSelection: toggleMovieSelection,
+    handleSelectAllMovies: selectAllMovies,
+    handleClearSelection: clearSelection,
+    handleBatchDeleteMovies: batchDeleteMovies,
+    handleBatchAddMoviesToCategory: batchAddMoviesToCategory,
+    handleBatchRemoveMoviesFromCategory: batchRemoveMoviesFromCategory,
     handleClearLibrary: clearStore,
   };
 };

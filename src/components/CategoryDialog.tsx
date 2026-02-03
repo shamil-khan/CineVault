@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Plus, Check, X, Lock } from 'lucide-react';
+import { Trash2, Edit2, Plus, Check, X, Lock, Minus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,21 +19,21 @@ import { cn } from '@/lib/utils';
 import { APP_TITLE } from '@/utils/Helper';
 
 export const CategoryDialog = () => {
-  const { isOpen, close, selectedMovie } = useCategoryDialog();
+  const { isOpen, close, selectedMovies } = useCategoryDialog();
   const {
     categories,
     movies,
     addCategory,
     removeCategory,
     updateCategory,
-    addMovieToCategory,
-    removeMovieFromCategory,
+    batchAddMoviesToCategory,
+    batchRemoveMoviesFromCategory,
   } = useMovieLibraryStore();
 
   // Get the latest movie state from the store to ensure categories are up to date
-  const activeMovie = selectedMovie
-    ? movies.find((m) => m.imdbID === selectedMovie.imdbID) || selectedMovie
-    : null;
+  const activeMovies = selectedMovies.map(
+    (sm) => movies.find((m) => m.imdbID === sm.imdbID) || sm,
+  );
 
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
@@ -74,17 +74,20 @@ export const CategoryDialog = () => {
     setEditingName('');
   };
 
-  const handleToggleCategoryForMovie = (category: any) => {
-    if (!activeMovie) return;
+  const handleToggleCategoryForMovies = (category: any) => {
+    if (activeMovies.length === 0) return;
 
-    const isSelected = activeMovie.categories?.some(
-      (c) => c.id === category.id,
+    const movieIDs = activeMovies.map((m) => m.imdbID);
+    const moviesWithCategory = activeMovies.filter((m) =>
+      m.categories?.some((c) => c.id === category.id),
     );
 
-    if (isSelected) {
-      removeMovieFromCategory(activeMovie.imdbID, category);
+    const allHaveIt = moviesWithCategory.length === activeMovies.length;
+
+    if (allHaveIt) {
+      batchRemoveMoviesFromCategory(movieIDs, category);
     } else {
-      addMovieToCategory(activeMovie.imdbID, category);
+      batchAddMoviesToCategory(movieIDs, category);
     }
   };
 
@@ -99,13 +102,13 @@ export const CategoryDialog = () => {
       <DialogContent className='w-[calc(100%-2rem)] sm:max-w-106.25 rounded-lg'>
         <DialogHeader>
           <DialogTitle>
-            {activeMovie
-              ? `Manage Categories for "${activeMovie.title}"`
-              : 'Manage Categories'}
+            {activeMovies.length === 1
+              ? `Manage Categories for "${activeMovies[0].title}"`
+              : `Manage Categories for ${activeMovies.length} movies`}
           </DialogTitle>
           <DialogDescription>
-            {activeMovie
-              ? 'Select categories to assign to this movie, or create new ones.'
+            {activeMovies.length > 0
+              ? 'Select categories to assign to these movies, or create new ones.'
               : `Create and manage categories for ${APP_TITLE}.`}
           </DialogDescription>
         </DialogHeader>
@@ -135,9 +138,17 @@ export const CategoryDialog = () => {
           )}
 
           {categories.map((category) => {
-            const isSelected =
-              activeMovie?.categories?.some((c) => c.id === category.id) ??
-              false;
+            const moviesWithCategory = activeMovies.filter((m) =>
+              m.categories?.some((c) => c.id === category.id),
+            );
+            const allHaveIt =
+              activeMovies.length > 0 &&
+              moviesWithCategory.length === activeMovies.length;
+            const someHaveIt =
+              activeMovies.length > 0 &&
+              moviesWithCategory.length > 0 &&
+              moviesWithCategory.length < activeMovies.length;
+
             const isEditing = editingCategoryId === category.id;
             const isSystem = isSystemCategory(category.name);
 
@@ -146,15 +157,15 @@ export const CategoryDialog = () => {
                 key={category.id}
                 className={cn(
                   'flex items-center justify-between p-2 rounded-md transition-colors',
-                  activeMovie && !isEditing && !isSystem
+                  activeMovies.length > 0 && !isEditing && !isSystem
                     ? 'hover:bg-accent cursor-pointer'
                     : 'bg-transparent',
-                  isSelected ? 'bg-accent/50' : '',
+                  allHaveIt || someHaveIt ? 'bg-accent/50' : '',
                   isSystem ? 'opacity-70' : '',
                 )}
                 onClick={() => {
-                  if (activeMovie && !isEditing && !isSystem) {
-                    handleToggleCategoryForMovie(category);
+                  if (activeMovies.length > 0 && !isEditing && !isSystem) {
+                    handleToggleCategoryForMovies(category);
                   }
                 }}>
                 {isEditing ? (
@@ -189,17 +200,20 @@ export const CategoryDialog = () => {
                 ) : (
                   <>
                     <div className='flex items-center gap-3'>
-                      {activeMovie && (
+                      {activeMovies.length > 0 && (
                         <div
                           className={cn(
                             'w-4 h-4 rounded border flex items-center justify-center transition-colors',
-                            isSelected
+                            allHaveIt || someHaveIt
                               ? 'bg-primary border-primary'
                               : 'border-muted-foreground',
                             isSystem ? 'opacity-50' : '',
                           )}>
-                          {isSelected && (
+                          {allHaveIt && (
                             <Check className='h-3 w-3 text-primary-foreground' />
+                          )}
+                          {someHaveIt && (
+                            <Minus className='h-3 w-3 text-primary-foreground' />
                           )}
                         </div>
                       )}

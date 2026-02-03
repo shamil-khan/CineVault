@@ -279,6 +279,34 @@ class MovieDbService {
     );
   };
 
+  deleteMovies = async (imdbIDs: string[]): Promise<void> => {
+    await db.transaction(
+      'rw',
+      db.movieDetailTable,
+      db.moviePosterTable,
+      db.movieUserStatusTable,
+      db.movieCategoryTable,
+      () => {
+        db.movieDetailTable
+          .where(movieDetailSchema.imdbID)
+          .anyOf(imdbIDs)
+          .delete();
+        db.moviePosterTable
+          .where(moviePosterSchema.imdbID)
+          .anyOf(imdbIDs)
+          .delete();
+        db.movieUserStatusTable
+          .where(movieUserStatusSchema.imdbID)
+          .anyOf(imdbIDs)
+          .delete();
+        db.movieCategoryTable
+          .where(movieCategorySchema.imdbID)
+          .anyOf(imdbIDs)
+          .delete();
+      },
+    );
+  };
+
   clearDatabase = async (deleteCategories = false) => {
     await db.movieDetailTable.clear();
     await db.moviePosterTable.clear();
@@ -307,6 +335,25 @@ class MovieDbService {
     }
   };
 
+  addMoviesToCategory = async (
+    imdbIDs: string[],
+    categoryId: number,
+  ): Promise<void> => {
+    await db.transaction('rw', db.movieCategoryTable, async () => {
+      for (const imdbID of imdbIDs) {
+        const existing = await db.movieCategoryTable
+          .where(
+            `[${movieCategorySchema.imdbID}+${movieCategorySchema.categoryId}]`,
+          )
+          .equals([imdbID, categoryId])
+          .first();
+        if (!existing) {
+          await db.movieCategoryTable.add({ imdbID, categoryId });
+        }
+      }
+    });
+  };
+
   removeMovieFromCategory = async (
     imdbID: string,
     categoryId: number,
@@ -316,6 +363,17 @@ class MovieDbService {
         `[${movieCategorySchema.imdbID}+${movieCategorySchema.categoryId}]`,
       )
       .equals([imdbID, categoryId])
+      .delete();
+  };
+
+  removeMoviesFromCategory = async (
+    imdbIDs: string[],
+    categoryId: number,
+  ): Promise<void> => {
+    await db.movieCategoryTable
+      .where(movieCategorySchema.imdbID)
+      .anyOf(imdbIDs)
+      .and((mc) => mc.categoryId === categoryId)
       .delete();
   };
 }

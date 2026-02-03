@@ -16,6 +16,7 @@ interface MovieLibraryState {
   movies: MovieInfo[];
   categories: Category[];
   filters: MovieFilterCriteria;
+  selectedMovieIds: string[];
   loadMovies: () => Promise<void>;
   addMovie: (movie: MovieInfo) => Promise<void>;
   updateMovie: (
@@ -37,6 +38,13 @@ interface MovieLibraryState {
   ) => Promise<void>;
   toggleMovieFavorite: (imdbID: string) => Promise<void>;
   toggleMovieWatched: (imdbID: string) => Promise<void>;
+
+  toggleMovieSelection: (imdbID: string) => void;
+  selectAllMovies: (imdbIDs: string[]) => void;
+  clearSelection: () => void;
+  batchDeleteMovies: (imdbIDs: string[]) => Promise<void>;
+  batchAddMoviesToCategory: (imdbIDs: string[], category: Category) => Promise<void>;
+  batchRemoveMoviesFromCategory: (imdbIDs: string[], category: Category) => Promise<void>;
 
   clearStore: (deleteCategories: boolean) => Promise<boolean>;
   updatedFilters: (filters: MovieFilterCriteria) => void;
@@ -87,6 +95,7 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         isFavorite: undefined,
         isWatched: undefined,
       },
+      selectedMovieIds: [],
 
       loadMovies: async () => {
         try {
@@ -314,6 +323,94 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         } catch (err) {
           logger.error('Failed to toggle watched:', err);
           toast.error('Failed to update watched status');
+        }
+      },
+
+      toggleMovieSelection: (imdbID: string) => {
+        set((state) => {
+          const index = state.selectedMovieIds.indexOf(imdbID);
+          if (index > -1) {
+            state.selectedMovieIds.splice(index, 1);
+          } else {
+            state.selectedMovieIds.push(imdbID);
+          }
+        });
+      },
+
+      selectAllMovies: (imdbIDs: string[]) => {
+        set((state) => {
+          state.selectedMovieIds = imdbIDs;
+        });
+      },
+
+      clearSelection: () => {
+        set((state) => {
+          state.selectedMovieIds = [];
+        });
+      },
+
+      batchDeleteMovies: async (imdbIDs: string[]) => {
+        try {
+          await movieDbService.deleteMovies(imdbIDs);
+          set((state) => {
+            state.movies = state.movies.filter(
+              (m) => !imdbIDs.includes(m.imdbID),
+            );
+            state.selectedMovieIds = [];
+          });
+          toast.success(`${imdbIDs.length} movies deleted successfully`);
+        } catch (err) {
+          toast.error('Failed to delete movies');
+          logger.error('Failed to delete movies:', err);
+        }
+      },
+
+      batchAddMoviesToCategory: async (imdbIDs: string[], category: Category) => {
+        try {
+          await movieDbService.addMoviesToCategory(imdbIDs, category.id);
+          set((state) => {
+            state.movies = state.movies.map((movie) =>
+              imdbIDs.includes(movie.imdbID)
+                ? {
+                    ...movie,
+                    categories: movie.categories?.some((c) => c.id === category.id)
+                      ? movie.categories
+                      : [...(movie.categories || []), category],
+                  }
+                : movie,
+            );
+          });
+          toast.success(`Added ${imdbIDs.length} movies to "${category.name}"`);
+        } catch (err) {
+          toast.error('Failed to add movies to category');
+          logger.error('Failed to batch add to category:', err);
+        }
+      },
+
+      batchRemoveMoviesFromCategory: async (
+        imdbIDs: string[],
+        category: Category,
+      ) => {
+        try {
+          await movieDbService.removeMoviesFromCategory(imdbIDs, category.id);
+          set((state) => {
+            state.movies = state.movies.map((movie) =>
+              imdbIDs.includes(movie.imdbID)
+                ? {
+                    ...movie,
+                    categories: movie.categories?.filter(
+                      (c) => c.id !== category.id,
+                    ),
+                  }
+                : movie,
+            );
+          });
+          toast.success(
+            `Removed ${imdbIDs.length} movies from "${category.name}"`,
+          );
+        } catch (err) {
+          toast.error('Failed to remove movies from category');
+          logger.error('Failed to batch remove from category:', err);
         }
       },
 

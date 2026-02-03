@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Star, Play } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Star, Play, Check } from 'lucide-react';
 import { format, parse } from 'numerable';
 import { en } from 'numerable/locale';
 import { type MovieInfo } from '@/models/MovieModel';
@@ -8,6 +8,8 @@ import { MovieCardBottomBar } from '@/components/MovieCardBottomBar';
 import { TrailerDialog } from '@/components/TrailerDialog';
 import { ImdbLink } from '@/components/ImdbLink';
 import { useCategoryDialog } from '@/hooks/useCategoryDialog';
+import { useMovieLibrary } from '@/hooks/useMovieLibrary';
+import { cn } from '@/lib/utils';
 
 const toCompact = (value: string) =>
   format(parse(value), '0.00 a', { locale: en }).replace(/\.00$/, '');
@@ -30,9 +32,14 @@ interface MovieCardProps {
 export const MovieCard = ({ movie }: MovieCardProps) => {
   const [trailerDialogOpen, setTrailerDialogOpen] = useState(false);
   const { open } = useCategoryDialog();
+  const { selectedMovieIds, handleToggleMovieSelection } = useMovieLibrary();
   const [posterSrc, setPosterSrc] = useState<string>(
     '/generic-movie-poster.svg',
   );
+
+  const isSelected = selectedMovieIds.includes(movie.imdbID);
+  const selectionMode = selectedMovieIds.length > 0;
+  const timerRef = useRef<any>(null);
 
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -55,10 +62,54 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
     };
   }, [movie.imdbID, movie.poster, movie.title]);
 
+  const handlePointerDown = () => {
+    if (selectionMode) return;
+    timerRef.current = setTimeout(() => {
+      handleToggleMovieSelection(movie.imdbID);
+    }, 500);
+  };
+
+  const handlePointerUp = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (selectionMode) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleToggleMovieSelection(movie.imdbID);
+    }
+  };
+
   return (
-    <Card className='group relative h-full flex flex-col overflow-hidden'>
+    <Card
+      className={cn(
+        'group relative h-full flex flex-col overflow-hidden transition-all duration-200 cursor-pointer',
+        isSelected ? 'ring-2 ring-blue-500 scale-[0.98] bg-blue-50/10' : '',
+        selectionMode ? 'hover:ring-2 hover:ring-blue-300' : '',
+      )}
+      onClick={handleCardClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onContextMenu={(e) => e.preventDefault()}>
       <CardContent className='py-0 px-2 flex-1 flex flex-col'>
         <div className='text-center relative h-full flex flex-col'>
+          {/* Selection indicator */}
+          {(selectionMode || isSelected) && (
+            <div
+              className={cn(
+                'absolute top-8 left-0 z-30 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors',
+                isSelected
+                  ? 'bg-blue-500 border-blue-500'
+                  : 'bg-black/20 border-white/50',
+              )}>
+              {isSelected && <Check className='w-4 h-4 text-white' />}
+            </div>
+          )}
+
           <h3 className='text-sm font-bold mb-1'>{movie.title}</h3>
           <p className='text-xs font-semibold mb-1'>{movie.detail.year}</p>
           <div className='text-center mb-1'>
@@ -97,17 +148,23 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
 
           <div
             className='relative mx-auto w-32 h-48 mb-1 cursor-pointer group/image'
-            onClick={() => setTrailerDialogOpen(true)}>
+            onClick={(e) => {
+              if (selectionMode) return;
+              e.stopPropagation();
+              setTrailerDialogOpen(true);
+            }}>
             <img
               src={posterSrc}
               alt={movie.title}
               className='w-full h-full object-cover rounded-md transition-opacity group-hover/image:opacity-75'
             />
-            <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity'>
-              <div className='bg-black/60 rounded-full p-3'>
-                <Play className='w-8 h-8 text-white fill-white' />
+            {!selectionMode && (
+              <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity'>
+                <div className='bg-black/60 rounded-full p-3'>
+                  <Play className='w-8 h-8 text-white fill-white' />
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <p className='text-xs font-normal'>{movie.detail.plot}</p>
