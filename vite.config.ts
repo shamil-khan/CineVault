@@ -18,6 +18,7 @@ export default defineConfig({
   preview: {
     port: 6602,
   },
+  assetsInclude: ['**/*.md'],
   plugins: [
     react(),
     tailwindcss(),

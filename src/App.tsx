@@ -52,18 +52,22 @@ function App() {
   return (
     <ErrorBoundary>
       <div className='p-1 w-full'>
-        <div className='flex items-center justify-center gap-3 mb-2'>
-          <img
-            src='/AppIcons/Web/android-chrome-192x192.png'
-            alt='CineVault Logo'
-            className='w-15 h-15'
-          />
-          <h3 className='text-2xl font-bold'>
-            {APP_TITLE} has ({movies.length}) {pluralName(movies, 'movie')}
-          </h3>
-          <Button variant='ghost' onClick={() => setAboutVisible(true)}>
-            About
-          </Button>
+        <div className='relative flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-2 px-4'>
+          <div className='flex items-center gap-3 order-2 sm:order-1'>
+            <img
+              src='/AppIcons/Web/android-chrome-192x192.png'
+              alt='CineVault Logo'
+              className='w-12 h-12 sm:w-15 sm:h-15'
+            />
+            <h3 className='text-xl sm:text-2xl font-bold text-center'>
+              {APP_TITLE} has ({movies.length}) {pluralName(movies, 'movie')}
+            </h3>
+          </div>
+          <div className='w-full flex justify-end sm:w-auto sm:absolute sm:right-4 order-1 sm:order-2'>
+            <Button variant='ghost' onClick={() => setAboutVisible(true)}>
+              About
+            </Button>
+          </div>
         </div>
         {hasActiveFilters && (
           <h6 className='text-md text-muted-foreground font-medium'>

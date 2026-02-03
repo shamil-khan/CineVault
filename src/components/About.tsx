@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import remarkGfm from 'remark-gfm';
 import {
   Card,
   CardContent,
@@ -7,15 +9,129 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Info, PlayCircle, Code, Github, Twitter, Globe } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// import type { Root, Heading, Text, Link, Image } from 'mdast';
+import type { Root, Text, Link } from 'mdast';
+import { remove } from 'unist-util-remove';
+import readmeRaw from '/README.md?raw';
+
+const normalizeTitle = (text: string) =>
+  text.replace(/[^\p{L}\p{N}\p{P}\p{Z}]/gu, '').trim();
+
+function remarkRemoveBadges() {
+  return (tree: Root) => {
+    remove(tree, (node) => {
+      // 1. Remove standalone images that look like badges (usually in the first few nodes)
+      if (node.type === 'image') return true;
+
+      // 2. Remove links that contain images (common badge format)
+      if (node.type === 'link') {
+        const link = node as Link;
+        return link.children.some((child) => child.type === 'image');
+      }
+
+      return false;
+    });
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// function remarkFilterSection(sectionTitle: string) {
+//   return (tree: Root) => {
+//     let isTargetSection = false;
+//     let targetDepth = 0;
+
+//     tree.children = tree.children.filter((node) => {
+//       if (node.type === 'heading') {
+//         // Extract text content from heading children
+//         const textValue = node.children
+//           .filter((c): c is Text => 'value' in c)
+//           .map((c) => c.value)
+//           .join('');
+
+//         if (textValue === sectionTitle) {
+//           isTargetSection = true;
+//           targetDepth = node.depth;
+//           return true;
+//         }
+
+//         if (isTargetSection && node.depth <= targetDepth) {
+//           isTargetSection = false;
+//         }
+//       }
+//       return isTargetSection;
+//     });
+//   };
+// }
+
+function remarkFilterMultipleSections(sectionTitles: string[]) {
+  const normalizedTargets = sectionTitles.map((t) =>
+    normalizeTitle(t).toLowerCase(),
+  );
+
+  return (tree: Root) => {
+    let currentLevel: number | null = null;
+    let keepNode = false;
+
+    tree.children = tree.children.filter((node) => {
+      if (node.type === 'heading') {
+        const titleText = node.children
+          .filter((c): c is Text => 'value' in c)
+          .map((c) => c.value)
+          .join('');
+
+        const cleanTitle = normalizeTitle(titleText).toLowerCase();
+        const isMatch = normalizedTargets.includes(cleanTitle);
+
+        if (isMatch) {
+          keepNode = true;
+          currentLevel = node.depth;
+          return true; // Keep the heading
+        }
+
+        // Stop keeping nodes if we hit a heading of same or higher level
+        if (keepNode && currentLevel !== null && node.depth <= currentLevel) {
+          keepNode = false;
+          currentLevel = null;
+        }
+      }
+      return keepNode;
+    });
+  };
+}
 
 interface AboutProps {
   onClose: () => void;
 }
 
+const MarkDownSections = ['Cine Vault', 'Key Innovations', 'Key Features'];
+
 export const About = ({ onClose }: AboutProps) => {
+  const [readmeText, setReadMeText] = useState('');
+
+  useEffect(() => {
+    const processMarkdown = async () => {
+      const file = await unified()
+        .use(remarkParse) // Parse to MD AST
+        .use(remarkGfm)
+        .use(() => remarkFilterMultipleSections(MarkDownSections))
+        .use(remarkRemoveBadges)
+        .use(remarkRehype) // MD AST to HTML AST
+        .use(rehypeStringify) // HTML AST to String
+        .process(readmeRaw);
+
+      const html = String(file);
+      setReadMeText(html);
+    };
+    processMarkdown();
+  }, []);
+
   return (
     <div className='container mx-auto max-w-4xl py-12 px-4'>
       <div className='text-center mb-10 space-y-2'>
@@ -41,39 +157,12 @@ export const About = ({ onClose }: AboutProps) => {
         {/* Section 1: App Info & Usage */}
         <TabsContent value='app'>
           <Card>
-            <CardHeader>
-              <CardTitle>
-                Local-First Cinematic Intelligence Movie Management & Discovery
-              </CardTitle>
-              <CardDescription>
-                Cine Vault is a cutting-edge Progressive Web App (PWA) designed
-                to empower movie enthusiasts with seamless management of their
-                personal film collections. By intelligently parsing local movie
-                files, fetching enriched metadata from premier sources like IMDb
-                and TMDB, and offering advanced categorization and filtering.
-                Cine Vault transforms scattered downloads into a curated,
-                offline-accessible cinematic repository. Whether you're
-                archiving classics or discovering hidden gems, this app delivers
-                a mind-blowing experience that blends local storage efficiency
-                with global database insights—ensuring your library is always at
-                your fingertips, even without an internet connection. Built for
-                cross-platform compatibility which includes supports iOS and
-                Android devices, allowing effortless installation as a
-                native-like app directly from your browser..
-              </CardDescription>
-            </CardHeader>
             <CardContent className='space-y-4'>
-              <p className='text-sm leading-relaxed'>
-                [Insert primary app description here. Describe the problem your
-                app solves and its core mission.]
-              </p>
-              <div className='space-y-2'>
-                <h3 className='font-semibold text-lg'>Key Features</h3>
-                <ul className='list-disc list-inside text-sm text-muted-foreground space-y-1'>
-                  <li>Feature One: [Brief description]</li>
-                  <li>Feature Two: [Brief description]</li>
-                  <li>Feature Three: [Brief description]</li>
-                </ul>
+              <div className='space-y-2 readme-container'>
+                <div
+                  className='text-left w-full markdown-body'
+                  dangerouslySetInnerHTML={{ __html: readmeText }}
+                />
               </div>
             </CardContent>
           </Card>
@@ -85,7 +174,8 @@ export const About = ({ onClose }: AboutProps) => {
             <CardHeader>
               <CardTitle>Video Guide</CardTitle>
               <CardDescription>
-                Learn how to use the app in under 5 minutes.
+                Learn how to use the Cine Vault in under 5 minutes. (Coming
+                Soon)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -105,7 +195,7 @@ export const About = ({ onClose }: AboutProps) => {
               <div className='mt-4 p-4 rounded-lg bg-secondary/30'>
                 <h4 className='font-medium text-sm mb-1'>Quick Start Tip:</h4>
                 <p className='text-xs text-muted-foreground italic'>
-                  [Add a helpful hint or common troubleshooting step here.]
+                  Typa a movie name in search bar.
                 </p>
               </div>
             </CardContent>
@@ -118,31 +208,27 @@ export const About = ({ onClose }: AboutProps) => {
             <CardHeader className='text-center'>
               <div className='flex justify-center mb-4'>
                 <Avatar className='h-24 w-24 border-2 border-primary/20'>
-                  <AvatarImage src='https://github.com' alt='Developer' />
+                  <AvatarImage
+                    src='https://avatars.githubusercontent.com/u/293682?v=4'
+                    alt='Developer'
+                  />
                   <AvatarFallback>DEV</AvatarFallback>
                 </Avatar>
               </div>
-              <CardTitle className='text-2xl'>Shamil Khan</CardTitle>
+              <CardTitle className='text-2xl'>Shamil Khan شمیل خان</CardTitle>
               <CardDescription>
-                [Title/Role — Full Stack Engineer]
+                [Software Architect — Full Stack Engineer]
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-6'>
-              <div className='flex flex-wrap justify-center gap-2'>
-                <Badge variant='secondary'>React</Badge>
-                <Badge variant='secondary'>TypeScript</Badge>
-                <Badge variant='secondary'>Tailwind CSS</Badge>
-                <Badge variant='secondary'>Shadcn UI</Badge>
-              </div>
-
               <div className='flex justify-center gap-6 pt-4 border-t border-border'>
                 <a
-                  href='#'
+                  href='https://github.com/shamil-khan'
                   className='text-muted-foreground hover:text-primary transition-colors'>
                   <Github className='w-6 h-6' />
                 </a>
                 <a
-                  href='#'
+                  href='https://x.com/iShamilKhan'
                   className='text-muted-foreground hover:text-primary transition-colors'>
                   <Twitter className='w-6 h-6' />
                 </a>
