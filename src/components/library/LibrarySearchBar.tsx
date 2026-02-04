@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import type { MovieInfo } from '@/models/MovieModel';
 import { useMovieFilters } from '@/hooks/useMovieFilters';
@@ -27,6 +28,7 @@ export const LibrarySearchBar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const [tmdbLoading, setTmdbLoading] = useState(false);
   const ignoreSearch = useRef(false);
   const manualChanged = useRef(false);
 
@@ -54,24 +56,125 @@ export const LibrarySearchBar = () => {
       return;
     }
 
+    if (filters.query.length >= 2 && !filters.query.startsWith(':')) {
+      setShowDropdown(true);
+      setTmdbLoading(true);
+    } else {
+      setShowDropdown(false);
+      setTmdbLoading(false);
+      setSearchResults([]);
+    }
+
     const searchTimer = setTimeout(async () => {
-      if (filters.query.length >= 2) {
+      if (filters.query.length >= 2 && !filters.query.startsWith(':')) {
         try {
           const results = await tmdbApiService.search(filters.query);
           setSearchResults(results.slice(0, 15));
-          setShowDropdown(true);
           setActiveIndex(-1);
         } catch (error) {
           console.error('Search failed:', error);
+        } finally {
+          setTmdbLoading(false);
         }
       } else {
         setSearchResults([]);
         setShowDropdown(false);
+        setTmdbLoading(false);
       }
     }, 500);
 
     return () => clearTimeout(searchTimer);
   }, [filters.query]);
+
+  const processMovieByImdbId = async (
+    imdbId: string,
+    tmdbMovie?: TmdbMovieResult,
+  ) => {
+    const imdbIndex = movies.findIndex((m) => m.imdbID === imdbId);
+    if (imdbIndex !== -1) {
+      const existingMovie = movies[imdbIndex];
+      toast.info(`"${existingMovie.title}" already exists in ${APP_TITLE}.`);
+      manualChanged.current = true;
+      onQueryChange(existingMovie.title);
+      setShowDropdown(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const imdbMovie = await omdbApiService.getMovieByImdbId(imdbId);
+      if (!imdbMovie || imdbMovie.Response === OmdbApi.ReservedWords.False) {
+        toast.error(
+          `IMDB information is not available for ID: ${imdbId}${tmdbMovie ? ` (${tmdbMovie.title})` : ''
+          }`,
+        );
+        return;
+      }
+
+      if (
+        tmdbMovie &&
+        imdbMovie.Title.toLowerCase() !== tmdbMovie.title.toLowerCase()
+      ) {
+        manualChanged.current = true;
+        onQueryChange(imdbMovie.Title);
+        setShowDropdown(false);
+      }
+
+      const posterURL =
+        imdbMovie.Poster === OmdbApi.ReservedWords.NotAvailable &&
+          tmdbMovie?.poster_path !== null &&
+          tmdbMovie?.poster_path !== undefined
+          ? tmdbApiService.getPosterURL(tmdbMovie.poster_path)
+          : imdbMovie.Poster;
+
+      const posterBlob = await utilityApiService.getPosterImage(posterURL);
+      imdbMovie.Poster = posterURL;
+
+      if (tmdbMovie) {
+        imdbMovie.Plot =
+          imdbMovie.Plot === OmdbApi.ReservedWords.NotAvailable
+            ? tmdbMovie.overview
+            : imdbMovie.Plot;
+        imdbMovie.Year =
+          imdbMovie.Year === OmdbApi.ReservedWords.NotAvailable
+            ? new Date(tmdbMovie.release_date).getFullYear().toString()
+            : imdbMovie.Year;
+      }
+
+      const searchedCategory = categories.find(
+        (c) => c.name === SYSTEM_CATEGORY_SEARCHED,
+      );
+
+      const movie: MovieInfo = {
+        imdbID: imdbMovie.imdbID,
+        title: imdbMovie.Title,
+        year: imdbMovie.Year,
+        detail: toMovieDetail(imdbMovie),
+        poster: posterBlob
+          ? {
+            url: imdbMovie.Poster,
+            mime: posterBlob?.type,
+            blob: posterBlob,
+          }
+          : undefined,
+        categories: searchedCategory ? [searchedCategory] : [],
+      };
+      handleAddMovie(movie);
+      manualChanged.current = true;
+      onQueryChange(movie.title);
+      setShowDropdown(false);
+
+      toast.success(
+        `"${movie.title}" added to ${APP_TITLE}${searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
+        }`,
+      );
+    } catch (err) {
+      logger.error('An error occurred during movie processing:', err);
+      toast.error(`Failed to load movie: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSelectMovie = async (tmdbMovie: TmdbMovieResult) => {
     ignoreSearch.current = true;
@@ -87,7 +190,9 @@ export const LibrarySearchBar = () => {
       return;
     }
 
-    logger.info(`Selected movie: ${tmdbMovie.title} (${tmdbMovie.id})`);
+    logger.info(
+      `Selected movie from TMDB: ${tmdbMovie.title} (${tmdbMovie.id})`,
+    );
     setLoading(true);
 
     try {
@@ -95,82 +200,35 @@ export const LibrarySearchBar = () => {
 
       if (!imdbId) {
         toast.info(`"${tmdbMovie.title}" IMDB ID is not available.`);
+        setLoading(false);
         return;
       }
 
-      const imdbIndex = movies.findIndex((m) => m.imdbID === imdbId);
-      if (imdbIndex !== -1) {
-        toast.info(
-          `"${movies[imdbIndex].title}" already exists in ${APP_TITLE}.`,
-        );
-        if (
-          movies[imdbIndex].title.toLowerCase() !==
-          tmdbMovie.title.toLowerCase()
-        ) {
-          manualChanged.current = true;
-          onQueryChange(movies[imdbIndex].title);
-          setShowDropdown(false);
-        }
-        return;
-      }
-
-      const imdbMovie = await omdbApiService.getMovieByImdbId(imdbId);
-      if (!imdbMovie || imdbMovie.Response === OmdbApi.ReservedWords.False) {
-        toast.info(`"${tmdbMovie.title}" IMDB information is not available.`);
-        return;
-      }
-
-      if (imdbMovie.Title.toLowerCase() !== tmdbMovie.title.toLowerCase()) {
-        manualChanged.current = true;
-        onQueryChange(imdbMovie.Title);
-        setShowDropdown(false);
-      }
-
-      const posterURL =
-        imdbMovie.Poster === OmdbApi.ReservedWords.NotAvailable &&
-        tmdbMovie?.poster_path !== null
-          ? tmdbApiService.getPosterURL(tmdbMovie.poster_path)
-          : imdbMovie.Poster;
-      const posterBlob = await utilityApiService.getPosterImage(posterURL);
-      imdbMovie.Poster = posterURL;
-      imdbMovie.Plot =
-        imdbMovie.Plot === OmdbApi.ReservedWords.NotAvailable
-          ? tmdbMovie.overview
-          : imdbMovie.Plot;
-      imdbMovie.Year =
-        imdbMovie.Year === OmdbApi.ReservedWords.NotAvailable
-          ? new Date(tmdbMovie.release_date).getFullYear().toString()
-          : imdbMovie.Year;
-
-      const searchedCategory = categories.find(
-        (c) => c.name === SYSTEM_CATEGORY_SEARCHED,
-      );
-
-      const movie: MovieInfo = {
-        imdbID: imdbMovie.imdbID,
-        title: imdbMovie.Title,
-        year: imdbMovie.Year,
-        detail: toMovieDetail(imdbMovie),
-        poster: posterBlob
-          ? {
-              url: imdbMovie.Poster,
-              mime: posterBlob?.type,
-              blob: posterBlob,
-            }
-          : undefined,
-        categories: searchedCategory ? [searchedCategory] : [],
-      };
-      handleAddMovie(movie);
-
-      toast.success(
-        `"${movie.title}" added to ${APP_TITLE}${
-          searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
-        }`,
-      );
+      await processMovieByImdbId(imdbId, tmdbMovie);
     } catch (err) {
       logger.error('An error occurred during selection:', err);
       toast.error(
         `The "${tmdbMovie.title}" is failed to load as ${(err as Error).message}`,
+      );
+      setLoading(false);
+    }
+  };
+
+  const handleSelectByImdbId = async (imdbId: string) => {
+    const cleanId = imdbId.trim();
+    if (!cleanId) return;
+
+    logger.info(`Searching for IMDb ID: ${cleanId}`);
+    setLoading(true);
+
+    try {
+      // Try to get TMDB info first for better metadata (overview, poster)
+      const tmdbMovie = await tmdbApiService.getMovieByImdbId(cleanId);
+      await processMovieByImdbId(cleanId, tmdbMovie || undefined);
+    } catch (err) {
+      logger.error('An error occurred during IMDb lookup:', err);
+      toast.error(
+        `Failed to lookup IMDb ID ${cleanId}: ${(err as Error).message}`,
       );
     } finally {
       setLoading(false);
@@ -194,6 +252,8 @@ export const LibrarySearchBar = () => {
     } else if (e.key === 'Enter') {
       if (showDropdown && activeIndex >= 0 && searchResults[activeIndex]) {
         handleSelectMovie(searchResults[activeIndex]);
+      } else if (filters.query.startsWith(':')) {
+        handleSelectByImdbId(filters.query.substring(1));
       }
     } else if (e.key === 'Escape') {
       setShowDropdown(false);
@@ -223,7 +283,8 @@ export const LibrarySearchBar = () => {
             onQueryChange(e.target.value);
           }}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
+          onFocus={(e) => {
+            e.target.select();
             if (searchResults.length > 0) setShowDropdown(true);
           }}
           onBlur={() => {
@@ -244,39 +305,59 @@ export const LibrarySearchBar = () => {
           </button>
         )}
       </div>
-      {showDropdown && searchResults.length > 0 && (
+
+      {showDropdown && (tmdbLoading || searchResults.length > 0) && (
         <div className='absolute top-full left-0 right-0 bg-background border border-border shadow-lg rounded-b-md overflow-hidden max-h-96 overflow-y-auto z-50'>
-          {searchResults.map((movie, index) => (
-            <div
-              key={movie.id}
-              className={`flex items-center gap-3 p-2 cursor-pointer transition-colors ${
-                index === activeIndex ? 'bg-accent' : 'hover:bg-accent'
-              }`}
-              onClick={() => handleSelectMovie(movie)}
-              onMouseEnter={() => setActiveIndex(index)}>
-              {movie.poster_path ? (
-                <img
-                  src={`${TMDB_IMAGE_URL}/w92${movie.poster_path}`}
-                  alt={movie.title}
-                  className='w-10 h-14 object-cover rounded'
-                />
-              ) : (
-                <div className='w-10 h-14 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground'>
-                  No Img
+          {tmdbLoading ? (
+            <div className='flex flex-col'>
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className='flex items-center gap-3 p-2 border-b border-border/50 last:border-0'>
+                  <Skeleton className='w-10 h-14 shrink-0' />
+                  <div className='flex flex-col gap-2 flex-1'>
+                    <Skeleton className='h-4 w-3/4' />
+                    <Skeleton className='h-3 w-1/4' />
+                  </div>
                 </div>
-              )}
-              <div className='flex flex-col text-left'>
-                <span className='font-medium text-sm truncate'>
-                  {movie.title}
-                </span>
-                <span className='text-xs text-muted-foreground'>
-                  {movie.release_date
-                    ? movie.release_date.split('-')[0]
-                    : 'Unknown'}
-                </span>
+              ))}
+              <div className='flex items-center justify-center p-4 text-muted-foreground border-t border-border/50'>
+                <Spinner className='h-4 w-4 mr-2' />
+                <span className='text-xs'>Searching TMDB...</span>
               </div>
             </div>
-          ))}
+          ) : (
+            searchResults.map((movie, index) => (
+              <div
+                key={movie.id}
+                className={`flex items-center gap-3 p-2 cursor-pointer transition-colors ${index === activeIndex ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                onClick={() => handleSelectMovie(movie)}
+                onMouseEnter={() => setActiveIndex(index)}>
+                {movie.poster_path ? (
+                  <img
+                    src={`${TMDB_IMAGE_URL}/w92${movie.poster_path}`}
+                    alt={movie.title}
+                    className='w-10 h-14 object-cover rounded shrink-0'
+                  />
+                ) : (
+                  <div className='w-10 h-14 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground shrink-0'>
+                    No Img
+                  </div>
+                )}
+                <div className='flex flex-col text-left'>
+                  <span className='font-medium text-sm truncate'>
+                    {movie.title}
+                  </span>
+                  <span className='text-xs text-muted-foreground'>
+                    {movie.release_date
+                      ? movie.release_date.split('-')[0]
+                      : 'Unknown'}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>

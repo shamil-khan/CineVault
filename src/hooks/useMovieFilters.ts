@@ -131,9 +131,10 @@ export const useMovieFilters = () => {
       return filters.rating.includes(targetSpan);
     };
     return movies.filter((movie) => {
-      const matchesQuery = filters.query
-        ? movie.title.toLowerCase().includes(filters.query.toLowerCase())
-        : true;
+      const matchesQuery =
+        filters.query && !filters.query.startsWith(':')
+          ? movie.title.toLowerCase().includes(filters.query.toLowerCase())
+          : true;
 
       const movieGenres = movie.detail.genre
         .split(',')
