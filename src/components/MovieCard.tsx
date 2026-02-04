@@ -39,7 +39,8 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
 
   const isSelected = selectedMovieIds.includes(movie.imdbID);
   const selectionMode = selectedMovieIds.length > 0;
-  const timerRef = useRef<any>(null);
+  const timerRef = useRef<number | null>(null);
+  const longPressOccurred = useRef(false);
 
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -62,20 +63,32 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
     };
   }, [movie.imdbID, movie.poster, movie.title]);
 
-  const handlePointerDown = () => {
-    if (selectionMode) return;
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only handle primary button (left click/touch)
+    if (e.button !== 0) return;
+    // Don't start timer if clicking on a button inside the card or if already in selection mode
+    if ((e.target as HTMLElement).closest('button') || selectionMode) return;
+
+    longPressOccurred.current = false;
     timerRef.current = setTimeout(() => {
       handleToggleMovieSelection(movie.imdbID);
+      longPressOccurred.current = true;
     }, 500);
   };
 
   const handlePointerUp = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
+    if (longPressOccurred.current) {
+      longPressOccurred.current = false;
+      return;
+    }
+
     if (selectionMode) {
       e.preventDefault();
       e.stopPropagation();
@@ -86,16 +99,20 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
   return (
     <Card
       className={cn(
-        'group relative h-full flex flex-col overflow-hidden transition-all duration-200 cursor-pointer',
+        'group relative h-full flex flex-col overflow-hidden',
+        'transition-all duration-200 cursor-pointer select-none touch-pan-y p-0',
         isSelected ? 'ring-2 ring-blue-500 scale-[0.98] bg-blue-50/10' : '',
         selectionMode ? 'hover:ring-2 hover:ring-blue-300' : '',
+        'active:scale-[0.99] active:brightness-95', // Visual feedback for press
       )}
+      style={{ WebkitTouchCallout: 'none' } as React.CSSProperties}
       onClick={handleCardClick}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onContextMenu={(e) => e.preventDefault()}>
-      <CardContent className='py-0 px-2 flex-1 flex flex-col'>
+      <CardContent className='pt-4 pb-4 px-2 flex-1 flex flex-col'>
         <div className='text-center relative h-full flex flex-col'>
           {/* Selection indicator */}
           {(selectionMode || isSelected) && (
