@@ -1,13 +1,12 @@
 import { toast } from 'sonner';
 import { type Category, type MovieInfo } from '@/models/MovieModel';
-import { useMovieLibraryStore } from '@/store/useMovieLibraryStore';
-import { SYSTEM_CATEGORY_IMPORT } from '@/services/MovieDbService';
+import { SYSTEM_CATEGORY_IMPORTED } from '@/services/MovieDbService';
 import { OmdbApi, omdbApiService } from '@/services/OmdbApiService';
 import { utilityApiService } from '@/services/UtilityApiService';
 import { toMovieDetail } from '@/utils/MovieFileHelper';
+import { useMovieLibrary } from '@/hooks/useMovieLibrary';
+import { APP_TITLE, APP_VERSION } from '@/utils/Helper';
 import logger from '@/core/logger';
-import { APP_TITLE } from '@/utils/Helper';
-import { APP_VERSION } from '@/utils/Helper';
 
 interface MovieItem {
   imdbID: string;
@@ -77,11 +76,11 @@ export const useImportExport = () => {
   const {
     movies,
     categories,
-    addMovie,
-    addCategory,
     getCategory,
-    addMovieToCategory,
-  } = useMovieLibraryStore();
+    handleAddMovie,
+    handleAddCategory,
+    handleAddMovieToCategory,
+  } = useMovieLibrary();
 
   return {
     exportMovies: (categoryIds: number[]): string => {
@@ -126,9 +125,7 @@ export const useImportExport = () => {
       try {
         const importFile: ImportExportFile = jsonFile as ImportExportFile;
         // Assuming "Import" category exists in state/DB
-        const importCategory = categories.find(
-          (c) => c.name === SYSTEM_CATEGORY_IMPORT,
-        );
+        const importCategory = getCategory(SYSTEM_CATEGORY_IMPORTED);
 
         let successCount = 0;
         let failedCount = 0;
@@ -137,7 +134,7 @@ export const useImportExport = () => {
           importFile.data.map(async (mc) => {
             let category = categories.find((c) => c.name === mc.categoryName);
             if (!category) {
-              await addCategory(mc.categoryName);
+              await handleAddCategory(mc.categoryName);
               category = getCategory(mc.categoryName);
             }
 
@@ -149,15 +146,15 @@ export const useImportExport = () => {
                   const newMovie = await fetchFullMovieInfo(item.imdbID);
 
                   if (newMovie) {
-                    await addMovie(newMovie);
+                    await handleAddMovie(newMovie);
                     successCount++;
                   } else {
                     failedCount++;
                     return;
                   }
                 }
-                addMovieToCategory(item.imdbID, importCategory!);
-                addMovieToCategory(item.imdbID, category!);
+                handleAddMovieToCategory(item.imdbID, importCategory!);
+                handleAddMovieToCategory(item.imdbID, category!);
               }),
             );
           }),

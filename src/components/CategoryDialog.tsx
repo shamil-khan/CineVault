@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Plus, Check, X, Lock, Minus } from 'lucide-react';
+import { Trash2, Edit2, Plus, Check, X, Minus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,27 +9,23 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useMovieLibraryStore } from '@/store/useMovieLibraryStore';
+import type { Category } from '@/models/MovieModel';
+import { useMovieLibrary } from '@/hooks/useMovieLibrary';
 import { useCategoryDialog } from '@/hooks/useCategoryDialog';
-import {
-  SYSTEM_CATEGORY_IMPORT,
-  SYSTEM_CATEGORY_SEARCHED,
-  SYSTEM_CATEGORY_UPLOADED,
-} from '@/services/MovieDbService';
-import { cn } from '@/lib/utils';
 import { APP_TITLE } from '@/utils/Helper';
+import { cn } from '@/lib/utils';
 
 export const CategoryDialog = () => {
   const { isOpen, close, selectedMovies } = useCategoryDialog();
   const {
-    categories,
     movies,
-    addCategory,
-    removeCategory,
-    updateCategory,
-    batchAddMoviesToCategory,
-    batchRemoveMoviesFromCategory,
-  } = useMovieLibraryStore();
+    userCategories,
+    handleAddCategory,
+    handleRemoveCategory,
+    handleUpdateCategory,
+    handleBatchAddMoviesToCategory,
+    handleBatchRemoveMoviesFromCategory,
+  } = useMovieLibrary();
 
   // Get the latest movie state from the store to ensure categories are up to date
   const activeMovies = selectedMovies.map(
@@ -44,16 +40,19 @@ export const CategoryDialog = () => {
 
   // Reset state when dialog closes or movie changes
   useEffect(() => {
-    if (!isOpen) {
-      setNewCategoryName('');
-      setEditingCategoryId(null);
-      setEditingName('');
-    }
+    const load = () => {
+      if (!isOpen) {
+        setNewCategoryName('');
+        setEditingCategoryId(null);
+        setEditingName('');
+      }
+    };
+    void load();
   }, [isOpen]);
 
-  const handleAddCategory = () => {
+  const handlerAddCategory = () => {
     if (newCategoryName.trim()) {
-      addCategory(newCategoryName.trim());
+      handleAddCategory(newCategoryName.trim());
       setNewCategoryName('');
     }
   };
@@ -65,7 +64,7 @@ export const CategoryDialog = () => {
 
   const handleSaveEdit = (id: number) => {
     if (editingName.trim()) {
-      updateCategory(id, editingName.trim());
+      handleUpdateCategory(id, editingName.trim());
       setEditingCategoryId(null);
     }
   };
@@ -75,7 +74,7 @@ export const CategoryDialog = () => {
     setEditingName('');
   };
 
-  const handleToggleCategoryForMovies = (category: any) => {
+  const handleToggleCategoryForMovies = (category: Category) => {
     if (activeMovies.length === 0) return;
 
     const movieIDs = activeMovies.map((m) => m.imdbID);
@@ -86,18 +85,10 @@ export const CategoryDialog = () => {
     const allHaveIt = moviesWithCategory.length === activeMovies.length;
 
     if (allHaveIt) {
-      batchRemoveMoviesFromCategory(movieIDs, category);
+      handleBatchRemoveMoviesFromCategory(movieIDs, category);
     } else {
-      batchAddMoviesToCategory(movieIDs, category);
+      handleBatchAddMoviesToCategory(movieIDs, category);
     }
-  };
-
-  const isSystemCategory = (name: string) => {
-    return (
-      name === SYSTEM_CATEGORY_IMPORT ||
-      name === SYSTEM_CATEGORY_SEARCHED ||
-      name === SYSTEM_CATEGORY_UPLOADED
-    );
   };
 
   return (
@@ -122,11 +113,11 @@ export const CategoryDialog = () => {
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') handleAddCategory();
+              if (e.key === 'Enter') handlerAddCategory();
             }}
           />
           <Button
-            onClick={handleAddCategory}
+            onClick={handlerAddCategory}
             size='icon'
             disabled={!newCategoryName.trim()}>
             <Plus className='h-4 w-4' />
@@ -134,13 +125,13 @@ export const CategoryDialog = () => {
         </div>
 
         <div className='bg-accent/20 rounded-md p-2 max-h-75 overflow-y-auto space-y-2'>
-          {categories.length === 0 && (
+          {userCategories.length === 0 && (
             <p className='text-center text-muted-foreground py-4 text-sm'>
               No categories yet.
             </p>
           )}
 
-          {categories.map((category) => {
+          {userCategories.map((category) => {
             const moviesWithCategory = activeMovies.filter((m) =>
               m.categories?.some((c) => c.id === category.id),
             );
@@ -153,21 +144,19 @@ export const CategoryDialog = () => {
               moviesWithCategory.length < activeMovies.length;
 
             const isEditing = editingCategoryId === category.id;
-            const isSystem = isSystemCategory(category.name);
 
             return (
               <div
                 key={category.id}
                 className={cn(
                   'flex items-center justify-between p-2 rounded-md transition-colors',
-                  activeMovies.length > 0 && !isEditing && !isSystem
+                  activeMovies.length > 0 && !isEditing
                     ? 'hover:bg-accent cursor-pointer'
                     : 'bg-transparent',
                   allHaveIt || someHaveIt ? 'bg-accent/50' : '',
-                  isSystem ? 'opacity-70' : '',
                 )}
                 onClick={() => {
-                  if (activeMovies.length > 0 && !isEditing && !isSystem) {
+                  if (activeMovies.length > 0 && !isEditing) {
                     handleToggleCategoryForMovies(category);
                   }
                 }}>
@@ -210,7 +199,6 @@ export const CategoryDialog = () => {
                             allHaveIt || someHaveIt
                               ? 'bg-primary border-primary'
                               : 'border-muted-foreground',
-                            isSystem ? 'opacity-50' : '',
                           )}>
                           {allHaveIt && (
                             <Check className='h-3 w-3 text-primary-foreground' />
@@ -222,9 +210,6 @@ export const CategoryDialog = () => {
                       )}
                       <span className='font-medium flex items-center gap-2'>
                         {category.name}
-                        {isSystem && (
-                          <Lock className='w-3 h-3 text-muted-foreground' />
-                        )}
                         <span className='text-xs text-muted-foreground font-normal'>
                           (
                           {
@@ -237,36 +222,34 @@ export const CategoryDialog = () => {
                       </span>
                     </div>
 
-                    {!isSystem && (
-                      <div
-                        className='flex items-center'
-                        onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='h-8 w-8 text-muted-foreground hover:text-foreground'
-                          onClick={() =>
-                            handleStartEdit(category.id, category.name)
-                          }>
-                          <Edit2 className='h-4 w-4' />
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='h-8 w-8 text-muted-foreground hover:text-destructive'
-                          onClick={() => {
-                            if (
-                              confirm(
-                                `Delete category "${category.name}"? This will remove it from all movies.`,
-                              )
-                            ) {
-                              removeCategory(category.id);
-                            }
-                          }}>
-                          <Trash2 className='h-4 w-4' />
-                        </Button>
-                      </div>
-                    )}
+                    <div
+                      className='flex items-center'
+                      onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='h-8 w-8 text-muted-foreground hover:text-foreground'
+                        onClick={() =>
+                          handleStartEdit(category.id, category.name)
+                        }>
+                        <Edit2 className='h-4 w-4' />
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className='h-8 w-8 text-muted-foreground hover:text-destructive'
+                        onClick={() => {
+                          if (
+                            confirm(
+                              `Delete category "${category.name}"? This will remove it from all movies.`,
+                            )
+                          ) {
+                            handleRemoveCategory(category.id);
+                          }
+                        }}>
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                    </div>
                   </>
                 )}
               </div>

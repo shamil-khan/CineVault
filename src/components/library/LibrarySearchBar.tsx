@@ -23,7 +23,7 @@ const TMDB_IMAGE_URL = import.meta.env.VITE_TMDB_IMAGE_URL;
 
 export const LibrarySearchBar = () => {
   const { filters, onFiltersUpdated } = useMovieFilters();
-  const { handleAddMovie, movies, categories } = useMovieLibrary();
+  const { movies, getCategory, handleAddMovie } = useMovieLibrary();
   const [searchResults, setSearchResults] = useState<TmdbMovieResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -157,9 +157,7 @@ export const LibrarySearchBar = () => {
             : imdbMovie.Year;
       }
 
-      const searchedCategory = categories.find(
-        (c) => c.name === SYSTEM_CATEGORY_SEARCHED,
-      );
+      const searchedCategory = getCategory(SYSTEM_CATEGORY_SEARCHED);
 
       const movie: MovieInfo = {
         imdbID: imdbMovie.imdbID,

@@ -3,11 +3,7 @@ import { Download, Film, Tag, Trash2, Loader2, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/components/ui/multi-select';
 import type { Category } from '@/models/MovieModel';
-import {
-  SYSTEM_CATEGORY_IMPORT,
-  SYSTEM_CATEGORY_SEARCHED,
-  SYSTEM_CATEGORY_UPLOADED,
-} from '@/services/MovieDbService';
+import { SYSTEM_CATEGORY_UPLOADED } from '@/services/MovieDbService';
 import { useCategoryDialog } from '@/hooks/useCategoryDialog';
 import { useMovieProcessor } from '@/hooks/useMovieProcessor';
 import { useMovieLibrary } from '@/hooks/useMovieLibrary';
@@ -61,7 +57,7 @@ export const FileProcessingHeader = ({
   onChangeStatus,
 }: FileProcessingHeaderProps) => {
   const { open } = useCategoryDialog();
-  const { categories, getCategory } = useMovieLibrary();
+  const { userCategories, getCategory } = useMovieLibrary();
   const { movies, processFiles, clear, isProcessing, isCompleted } =
     useMovieProcessor();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -94,13 +90,6 @@ export const FileProcessingHeader = ({
     void loadStatusCount();
   }, [movies]);
 
-  const userCategories = categories.filter(
-    (c) =>
-      c.name !== SYSTEM_CATEGORY_IMPORT &&
-      c.name !== SYSTEM_CATEGORY_SEARCHED &&
-      c.name !== SYSTEM_CATEGORY_UPLOADED,
-  );
-
   const onProcessMovies = async () => {
     const uploaded = getCategory(SYSTEM_CATEGORY_UPLOADED);
     const all = new Set<Category | undefined>();
@@ -108,7 +97,7 @@ export const FileProcessingHeader = ({
 
     selectedCategories.forEach((c: string) => {
       const id = parseInt(c, 10);
-      all.add(categories.find((c) => c.id === id));
+      all.add(userCategories.find((c) => c.id === id));
     });
     const final = Array.from(all).filter(Boolean) as Category[];
     await processFiles(final);

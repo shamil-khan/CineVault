@@ -15,7 +15,7 @@ import {
 import logger from '@/core/logger';
 
 // System Category Names
-export const SYSTEM_CATEGORY_IMPORT = 'Import';
+export const SYSTEM_CATEGORY_IMPORTED = 'Imported';
 export const SYSTEM_CATEGORY_SEARCHED = 'Searched';
 export const SYSTEM_CATEGORY_UPLOADED = 'Uploaded';
 
@@ -26,7 +26,7 @@ class MovieDbService {
 
   async initDatabase() {
     logger.info('Initializing MovieDbService database');
-    await this.ensureCategory(SYSTEM_CATEGORY_IMPORT);
+    await this.ensureCategory(SYSTEM_CATEGORY_IMPORTED);
     await this.ensureCategory(SYSTEM_CATEGORY_SEARCHED);
     await this.ensureCategory(SYSTEM_CATEGORY_UPLOADED);
   }
@@ -317,7 +317,11 @@ class MovieDbService {
     if (deleteCategories) {
       await db.categoryTable
         .where(categorySchema.name)
-        .noneOf([SYSTEM_CATEGORY_SEARCHED, SYSTEM_CATEGORY_UPLOADED])
+        .noneOf([
+          SYSTEM_CATEGORY_IMPORTED,
+          SYSTEM_CATEGORY_SEARCHED,
+          SYSTEM_CATEGORY_UPLOADED,
+        ])
         .delete();
     }
   };

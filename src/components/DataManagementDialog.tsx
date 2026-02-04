@@ -22,11 +22,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  SYSTEM_CATEGORY_IMPORT,
-  SYSTEM_CATEGORY_SEARCHED,
-  SYSTEM_CATEGORY_UPLOADED,
-} from '@/services/MovieDbService';
 import { useMovieLibrary } from '@/hooks/useMovieLibrary';
 import { useMovieProcessor } from '@/hooks/useMovieProcessor';
 import { useImportExport } from '@/hooks/useImportExport';
@@ -37,19 +32,12 @@ import logger from '@/core/logger';
 
 export const DataManagementDialog = () => {
   const { isOpen, close } = useDataManagementDialog();
-  const { movies, categories, handleClearLibrary } = useMovieLibrary();
+  const { movies, userCategories, handleClearLibrary } = useMovieLibrary();
   const { clear } = useMovieProcessor();
   const { exportMovies, importMovies } = useImportExport();
   const [deleteCategories, setDeleteCategories] = useState(false);
   const [selectedCatIds, setSelectedCatIds] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const userCategories = categories.filter(
-    (c) =>
-      c.name !== SYSTEM_CATEGORY_IMPORT &&
-      c.name !== SYSTEM_CATEGORY_SEARCHED &&
-      c.name !== SYSTEM_CATEGORY_UPLOADED,
-  );
 
   const toggleCategory = (id: number) => {
     setSelectedCatIds((prev) =>
