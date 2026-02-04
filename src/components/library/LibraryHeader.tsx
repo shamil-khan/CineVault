@@ -29,14 +29,14 @@ export const LibraryHeader = () => {
           <LibraryFilterToggleGroup
             onToggleFilters={() => setShowFilters(!showFilters)}
           />
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={openDataManagement}
+            title='Manage Data'>
+            <Database className='h-4 w-4' />
+          </Button>
         </div>
-        <Button
-          variant='outline'
-          size='icon'
-          onClick={openDataManagement}
-          title='Manage Data'>
-          <Database className='h-4 w-4' />
-        </Button>
       </div>
 
       {showFilters && <LibraryFilterBar />}

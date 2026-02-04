@@ -9,9 +9,10 @@ import { LibraryHeader } from '@/components/library/LibraryHeader';
 import { MovieGallery } from '@/components/MovieGallery';
 import { CategoryDialog } from '@/components/CategoryDialog';
 import { DataManagementDialog } from '@/components/DataManagementDialog';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { About } from '@/components/About';
 import { APP_TITLE, pluralName } from '@/utils/Helper';
-import { Button } from './components/ui/button';
+import { Button } from '@/components/ui/button';
 
 function App() {
   const { movies, loadMovies } = useMovieLibrary();
@@ -19,7 +20,7 @@ function App() {
   const appRef = useRef(false);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [aboutVisible, setAboutVisible] = useState<boolean>(false);
-
+  const isMobile = useMediaQuery('(max-width: 768px)');
   useEffect(() => {
     if (appRef.current) {
       return;
@@ -93,7 +94,17 @@ function App() {
 
       <CategoryDialog />
       <DataManagementDialog />
-      <Toaster />
+      <Toaster
+        position={isMobile ? 'top-center' : 'bottom-right'}
+        expand={false}
+        richColors
+        closeButton
+        toastOptions={{
+          // Apply iOS styling to all toasts
+          className:
+            'rounded-[20px] backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border-none shadow-2xl',
+        }}
+      />
     </ErrorBoundary>
   );
 }

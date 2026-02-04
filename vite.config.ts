@@ -31,9 +31,9 @@ export default defineConfig({
         'pwa-512x512.png',
       ],
       manifest: {
-        name: 'Local Movies',
-        short_name: 'Local Movies',
-        description: 'Your personal local movie collection manager',
+        name: 'Cine Vault',
+        short_name: 'Cine Vault',
+        description: 'Cine Vault: Your personal local movie collection manager',
         theme_color: '#000000',
         background_color: '#000000',
         icons: [

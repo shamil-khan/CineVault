@@ -1,0 +1,23 @@
+// src/hooks/use-media-query.ts
+import { useEffect, useState } from 'react';
+
+export function useMediaQuery(query: string) {
+  const [value, setValue] = useState(false);
+
+  useEffect(() => {
+    const load = () => {
+      function onChange(event: MediaQueryListEvent) {
+        setValue(event.matches);
+      }
+
+      const result = window.matchMedia(query);
+      result.addEventListener('change', onChange);
+      setValue(result.matches);
+
+      return () => result.removeEventListener('change', onChange);
+    };
+    void load();
+  }, [query]);
+
+  return value;
+}

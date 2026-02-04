@@ -15,7 +15,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 // import type { Root, Heading, Text, Link, Image } from 'mdast';
 import type { Root, Text, Link } from 'mdast';
 import { remove } from 'unist-util-remove';
@@ -41,7 +41,6 @@ function remarkRemoveBadges() {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 // function remarkFilterSection(sectionTitle: string) {
 //   return (tree: Root) => {
 //     let isTargetSection = false;
@@ -242,9 +241,14 @@ export const About = ({ onClose }: AboutProps) => {
           </Card>
         </TabsContent>
       </Tabs>
-      <Button variant='ghost' onClick={() => onClose()}>
-        Close
-      </Button>
+      <div className='py-4'>
+        <Button
+          variant='ghost'
+          onClick={() => onClose()}
+          className='w-full flex items-center gap-2'>
+          Close
+        </Button>
+      </div>
     </div>
   );
 };
