@@ -15,9 +15,9 @@ import {
 import logger from '@/core/logger';
 
 // System Category Names
+export const SYSTEM_CATEGORY_IMPORT = 'Import';
 export const SYSTEM_CATEGORY_SEARCHED = 'Searched';
 export const SYSTEM_CATEGORY_UPLOADED = 'Uploaded';
-export const SYSTEM_CATEGORY_IMPORT = 'Import';
 
 class MovieDbService {
   constructor() {
@@ -26,9 +26,9 @@ class MovieDbService {
 
   async initDatabase() {
     logger.info('Initializing MovieDbService database');
+    await this.ensureCategory(SYSTEM_CATEGORY_IMPORT);
     await this.ensureCategory(SYSTEM_CATEGORY_SEARCHED);
     await this.ensureCategory(SYSTEM_CATEGORY_UPLOADED);
-    await this.ensureCategory(SYSTEM_CATEGORY_IMPORT);
   }
 
   // Helper to ensure a category exists

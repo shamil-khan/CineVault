@@ -28,11 +28,12 @@ import {
   SYSTEM_CATEGORY_UPLOADED,
 } from '@/services/MovieDbService';
 import { useMovieLibrary } from '@/hooks/useMovieLibrary';
+import { useMovieProcessor } from '@/hooks/useMovieProcessor';
 import { useImportExport } from '@/hooks/useImportExport';
 import { useDataManagementDialog } from '@/hooks/useDataManagementDialog';
 import { cn } from '@/lib/utils';
 import { APP_TITLE } from '@/utils/Helper';
-import { useMovieProcessor } from '@/hooks/useMovieProcessor';
+import logger from '@/core/logger';
 
 export const DataManagementDialog = () => {
   const { isOpen, close } = useDataManagementDialog();
@@ -98,6 +99,7 @@ export const DataManagementDialog = () => {
         await importMovies(json);
       } catch (err) {
         toast.error('Failed to parse JSON file');
+        logger.error('Failed to parse JSON file', err);
       }
     };
     reader.readAsText(file);
@@ -128,7 +130,7 @@ export const DataManagementDialog = () => {
 
         <Accordion type='single' collapsible defaultValue='plans'>
           {/* Export Section */}
-          <AccordionItem key='export' value='export'>
+          <AccordionItem value='export' disabled={userCategories.length === 0}>
             <AccordionTrigger>
               <h4 className='text-sm font-semibold flex items-center gap-2'>
                 <Download className='w-4 h-4' />
@@ -175,7 +177,7 @@ export const DataManagementDialog = () => {
           </AccordionItem>
 
           {/* Import Section */}
-          <AccordionItem key='import' value='import'>
+          <AccordionItem value='import'>
             <AccordionTrigger>
               <h4 className='text-sm font-semibold flex items-center gap-2'>
                 <Upload className='w-4 h-4' />
@@ -206,7 +208,7 @@ export const DataManagementDialog = () => {
           </AccordionItem>
 
           {/* Delete Section */}
-          <AccordionItem key='delete' value='delete'>
+          <AccordionItem value='delete'>
             <AccordionTrigger>
               <h4 className='text-sm font-semibold flex items-center gap-2 text-destructive'>
                 <AlertOctagon className='h-5 w-5' /> Delete {APP_TITLE}?
@@ -214,40 +216,47 @@ export const DataManagementDialog = () => {
             </AccordionTrigger>
             <AccordionContent>
               <div className='space-y-3'>
+                <p className='text-xs text-muted-foreground'>
+                  This will permanently delete ALL movies, files, and posters
+                  from your local database. This action cannot be undone.
+                </p>
                 {userCategories.length > 0 && (
-                  <div className='mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 max-h-40 overflow-y-auto'>
-                    <p className='mb-2 text-xs font-medium text-destructive'>
-                      Categories in {APP_TITLE}
-                    </p>
-                    <ul className='space-y-1 text-xs'>
-                      {userCategories.map((category) => (
-                        <li
-                          key={category.id}
-                          className='flex items-center justify-between'>
-                          <span>{category.name}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  <>
+                    <div className='mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 max-h-40 overflow-y-auto'>
+                      <p className='mb-2 text-xs font-medium text-destructive'>
+                        Categories in {APP_TITLE}
+                      </p>
+                      <ul className='space-y-1 text-xs'>
+                        {userCategories.map((category) => (
+                          <li
+                            key={category.id}
+                            className='flex items-center justify-between'>
+                            <span>{category.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className='mt-4 flex items-center justify-between rounded-md border p-3'>
+                      <div className='space-y-1'>
+                        <p className='text-sm font-medium'>
+                          Also delete categories
+                        </p>
+                        <p className='text-xs text-muted-foreground'>
+                          If enabled, all categories will be removed. Otherwise
+                          categories are kept.
+                        </p>
+                      </div>
+
+                      <Button
+                        type='button'
+                        variant={deleteCategories ? 'destructive' : 'outline'}
+                        size='sm'
+                        onClick={() => setDeleteCategories((prev) => !prev)}>
+                        {deleteCategories ? 'Will delete' : 'Keep categories'}
+                      </Button>
+                    </div>
+                  </>
                 )}
-                <div className='mt-4 flex items-center justify-between rounded-md border p-3'>
-                  <div className='space-y-1'>
-                    <p className='text-sm font-medium'>
-                      Also delete categories
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      If enabled, all categories will be removed. Otherwise
-                      categories are kept.
-                    </p>
-                  </div>
-                  <Button
-                    type='button'
-                    variant={deleteCategories ? 'destructive' : 'outline'}
-                    size='sm'
-                    onClick={() => setDeleteCategories((prev) => !prev)}>
-                    {deleteCategories ? 'Will delete' : 'Keep categories'}
-                  </Button>
-                </div>
                 <Button
                   variant='destructive'
                   className='w-full'

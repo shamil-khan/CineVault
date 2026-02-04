@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { useMovieLibraryStore } from '@/store/useMovieLibraryStore';
 import { useCategoryDialog } from '@/hooks/useCategoryDialog';
 import {
+  SYSTEM_CATEGORY_IMPORT,
   SYSTEM_CATEGORY_SEARCHED,
   SYSTEM_CATEGORY_UPLOADED,
 } from '@/services/MovieDbService';
@@ -93,7 +94,9 @@ export const CategoryDialog = () => {
 
   const isSystemCategory = (name: string) => {
     return (
-      name === SYSTEM_CATEGORY_SEARCHED || name === SYSTEM_CATEGORY_UPLOADED
+      name === SYSTEM_CATEGORY_IMPORT ||
+      name === SYSTEM_CATEGORY_SEARCHED ||
+      name === SYSTEM_CATEGORY_UPLOADED
     );
   };
 
