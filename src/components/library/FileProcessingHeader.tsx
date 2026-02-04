@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MultiSelect } from '@/components/ui/multi-select';
 import type { Category } from '@/models/MovieModel';
 import {
+  SYSTEM_CATEGORY_IMPORT,
   SYSTEM_CATEGORY_SEARCHED,
   SYSTEM_CATEGORY_UPLOADED,
 } from '@/services/MovieDbService';
@@ -95,6 +96,7 @@ export const FileProcessingHeader = ({
 
   const userCategories = categories.filter(
     (c) =>
+      c.name !== SYSTEM_CATEGORY_IMPORT &&
       c.name !== SYSTEM_CATEGORY_SEARCHED &&
       c.name !== SYSTEM_CATEGORY_UPLOADED,
   );

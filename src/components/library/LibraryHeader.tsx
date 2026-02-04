@@ -1,14 +1,17 @@
+import { useState } from 'react';
+import { Database } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { CompactFolderUpload } from '@/components/CompactFolderUpload';
 import { FileProcessingPanel } from '@/components/library/FileProcessingPanel';
-import { LibraryDeleteDialog } from '@/components/library/LibraryDeleteDialog';
-import { useState } from 'react';
-import { LibrarySearchBar } from './LibrarySearchBar';
-import { LibraryFilterBar } from './LibraryFilterBar';
-import { LibraryFilterToggleGroup } from './LibraryFilterToggleGroup';
+import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
+import { LibraryFilterBar } from '@/components/library/LibraryFilterBar';
+import { LibraryFilterToggleGroup } from '@/components/library/LibraryFilterToggleGroup';
+import { useDataManagementDialog } from '@/hooks/useDataManagementDialog';
 
 export const LibraryHeader = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [uploadedFileNames, setUploadedFileNames] = useState<string[]>([]);
+  const { open: openDataManagement } = useDataManagementDialog();
 
   return (
     <div className='p-4 space-y-4'>
@@ -26,12 +29,17 @@ export const LibraryHeader = () => {
           <LibraryFilterToggleGroup
             onToggleFilters={() => setShowFilters(!showFilters)}
           />
-          <LibraryDeleteDialog />
         </div>
+        <Button
+          variant='outline'
+          size='icon'
+          onClick={openDataManagement}
+          title='Manage Data'>
+          <Database className='h-4 w-4' />
+        </Button>
       </div>
 
       {showFilters && <LibraryFilterBar />}
-
       <FileProcessingPanel fileNames={uploadedFileNames} />
     </div>
   );

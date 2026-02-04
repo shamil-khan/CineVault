@@ -8,6 +8,7 @@ import { useMovieFilters } from '@/hooks/useMovieFilters';
 import { LibraryHeader } from '@/components/library/LibraryHeader';
 import { MovieGallery } from '@/components/MovieGallery';
 import { CategoryDialog } from '@/components/CategoryDialog';
+import { DataManagementDialog } from '@/components/DataManagementDialog';
 import { About } from '@/components/About';
 import { APP_TITLE, pluralName } from '@/utils/Helper';
 import { Button } from './components/ui/button';
@@ -91,6 +92,7 @@ function App() {
       )}
 
       <CategoryDialog />
+      <DataManagementDialog />
       <Toaster />
     </ErrorBoundary>
   );

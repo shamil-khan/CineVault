@@ -43,8 +43,14 @@ interface MovieLibraryState {
   selectAllMovies: (imdbIDs: string[]) => void;
   clearSelection: () => void;
   batchDeleteMovies: (imdbIDs: string[]) => Promise<void>;
-  batchAddMoviesToCategory: (imdbIDs: string[], category: Category) => Promise<void>;
-  batchRemoveMoviesFromCategory: (imdbIDs: string[], category: Category) => Promise<void>;
+  batchAddMoviesToCategory: (
+    imdbIDs: string[],
+    category: Category,
+  ) => Promise<void>;
+  batchRemoveMoviesFromCategory: (
+    imdbIDs: string[],
+    category: Category,
+  ) => Promise<void>;
 
   clearStore: (deleteCategories: boolean) => Promise<boolean>;
   updatedFilters: (filters: MovieFilterCriteria) => void;
@@ -273,9 +279,7 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
                 : movie,
             );
           });
-          toast.success('Category added successfully');
         } catch (err) {
-          toast.error('Failed to add category');
           logger.error('Failed to add category:', err);
         }
       },
@@ -365,7 +369,10 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         }
       },
 
-      batchAddMoviesToCategory: async (imdbIDs: string[], category: Category) => {
+      batchAddMoviesToCategory: async (
+        imdbIDs: string[],
+        category: Category,
+      ) => {
         try {
           await movieDbService.addMoviesToCategory(imdbIDs, category.id);
           set((state) => {
@@ -373,7 +380,9 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
               imdbIDs.includes(movie.imdbID)
                 ? {
                     ...movie,
-                    categories: movie.categories?.some((c) => c.id === category.id)
+                    categories: movie.categories?.some(
+                      (c) => c.id === category.id,
+                    )
                       ? movie.categories
                       : [...(movie.categories || []), category],
                   }

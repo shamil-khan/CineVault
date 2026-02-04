@@ -12,7 +12,11 @@ export const useCategoryDialog = create<CategoryDialogState>((set) => ({
   isOpen: false,
   selectedMovies: [],
   open: (movies) => {
-    const movieArray = movies ? (Array.isArray(movies) ? movies : [movies]) : [];
+    const movieArray = movies
+      ? Array.isArray(movies)
+        ? movies
+        : [movies]
+      : [];
     set({ isOpen: true, selectedMovies: movieArray });
   },
   close: () => set({ isOpen: false, selectedMovies: [] }),
