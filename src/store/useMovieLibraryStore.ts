@@ -43,6 +43,8 @@ interface MovieLibraryState {
   selectAllMovies: (imdbIDs: string[]) => void;
   clearSelection: () => void;
   batchDeleteMovies: (imdbIDs: string[]) => Promise<void>;
+  batchToggleFavorite: (imdbIDs: string[]) => Promise<void>;
+  batchToggleWatched: (imdbIDs: string[]) => Promise<void>;
   batchAddMoviesToCategory: (
     imdbIDs: string[],
     category: Category,
@@ -366,6 +368,32 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         } catch (err) {
           toast.error('Failed to delete movies');
           logger.error('Failed to delete movies:', err);
+        }
+      },
+
+      batchToggleFavorite: async (imdbIDs: string[]) => {
+        try {
+          // In a real app, you might want to determine the target state (all fav or toggle each).
+          // For simplicity, we toggle each.
+          await Promise.all(
+            imdbIDs.map((id) => toggleUserStatus(id, true, false)),
+          );
+          toast.success(`Updated favorites for ${imdbIDs.length} movies`);
+        } catch (err) {
+          logger.error('Failed to batch toggle favorite:', err);
+          toast.error('Failed to update favorite status');
+        }
+      },
+
+      batchToggleWatched: async (imdbIDs: string[]) => {
+        try {
+          await Promise.all(
+            imdbIDs.map((id) => toggleUserStatus(id, false, true)),
+          );
+          toast.success(`Updated watched status for ${imdbIDs.length} movies`);
+        } catch (err) {
+          logger.error('Failed to batch toggle watched:', err);
+          toast.error('Failed to update watched status');
         }
       },
 

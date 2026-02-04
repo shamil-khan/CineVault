@@ -134,11 +134,11 @@ class TmdbApiService {
   private findMovieByImdbId = async <
     T extends TmdbFindSimpleResponse | TmdbFindDetailResponse,
   >(
-    imdbId: string,
+    imdbID: string,
   ): Promise<T | null> => {
     try {
       const response = await this.apiService.get<TmdbFindResponse<T>>(
-        `/find/${imdbId}`,
+        `/find/${imdbID}`,
         {
           params: {
             external_source: 'imdb_id',
@@ -153,10 +153,10 @@ class TmdbApiService {
         return response.data.movie_results[0];
       }
 
-      logger.warn(`No TMDb movie found for IMDb ID: ${imdbId}`);
+      logger.warn(`No TMDb movie found for IMDb ID: ${imdbID}`);
       return null;
     } catch (error) {
-      logger.error(`Error finding movie by IMDb ID ${imdbId}:`, error);
+      logger.error(`Error finding movie by IMDb ID ${imdbID}:`, error);
       throw error;
     }
   };
@@ -181,11 +181,11 @@ class TmdbApiService {
    * Get YouTube trailer for a movie using IMDb ID
    * Returns the first official trailer, or the first trailer if no official one exists
    */
-  getTrailerByImdbId = async (imdbId: string): Promise<MovieTrailer | null> => {
+  getTrailerByImdbId = async (imdbID: string): Promise<MovieTrailer | null> => {
     try {
       // Step 1: Find TMDb movie ID
       const movie =
-        await this.findMovieByImdbId<TmdbFindSimpleResponse>(imdbId);
+        await this.findMovieByImdbId<TmdbFindSimpleResponse>(imdbID);
       if (!movie) {
         return null;
       }
@@ -199,7 +199,7 @@ class TmdbApiService {
       );
 
       if (trailers.length === 0) {
-        logger.warn(`No trailers found for IMDb ID: ${imdbId}`);
+        logger.warn(`No trailers found for IMDb ID: ${imdbID}`);
         return null;
       }
 
@@ -213,7 +213,7 @@ class TmdbApiService {
         official: selectedTrailer.official,
       };
     } catch (error) {
-      logger.error(`Error getting trailer for IMDb ID ${imdbId}:`, error);
+      logger.error(`Error getting trailer for IMDb ID ${imdbID}:`, error);
       throw error;
     }
   };
@@ -222,9 +222,9 @@ class TmdbApiService {
     `${TMDB_IMAGE_URL}/w342${posterPath}`;
 
   getMovieByImdbId = async (
-    imdbId: string,
+    imdbID: string,
   ): Promise<TmdbMovieResult | null> => {
-    const movie = await this.findMovieByImdbId<TmdbFindDetailResponse>(imdbId);
+    const movie = await this.findMovieByImdbId<TmdbFindDetailResponse>(imdbID);
     if (!movie) {
       return null;
     }

@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { X, Search } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -86,11 +86,11 @@ export const LibrarySearchBar = () => {
     return () => clearTimeout(searchTimer);
   }, [filters.query]);
 
-  const processMovieByImdbId = async (
-    imdbId: string,
+  const processMovieByImdbID = async (
+    imdbID: string,
     tmdbMovie?: TmdbMovieResult,
   ) => {
-    const imdbIndex = movies.findIndex((m) => m.imdbID === imdbId);
+    const imdbIndex = movies.findIndex((m) => m.imdbID === imdbID);
     if (imdbIndex !== -1) {
       const existingMovie = movies[imdbIndex];
       toast.info(`"${existingMovie.title}" already exists in ${APP_TITLE}.`);
@@ -102,10 +102,11 @@ export const LibrarySearchBar = () => {
 
     setLoading(true);
     try {
-      const imdbMovie = await omdbApiService.getMovieByImdbId(imdbId);
+      const imdbMovie = await omdbApiService.getMovieByImdbId(imdbID);
       if (!imdbMovie || imdbMovie.Response === OmdbApi.ReservedWords.False) {
         toast.error(
-          `IMDB information is not available for ID: ${imdbId}${tmdbMovie ? ` (${tmdbMovie.title})` : ''
+          `IMDB information is not available for ID: ${imdbID}${
+            tmdbMovie ? ` (${tmdbMovie.title})` : ''
           }`,
         );
         return;
@@ -120,15 +121,30 @@ export const LibrarySearchBar = () => {
         setShowDropdown(false);
       }
 
-      const posterURL =
-        imdbMovie.Poster === OmdbApi.ReservedWords.NotAvailable &&
-          tmdbMovie?.poster_path !== null &&
-          tmdbMovie?.poster_path !== undefined
-          ? tmdbApiService.getPosterURL(tmdbMovie.poster_path)
-          : imdbMovie.Poster;
+      let posterBlob: Blob | null = null;
+      if (imdbMovie.Poster !== OmdbApi.ReservedWords.NotAvailable) {
+        try {
+          posterBlob = await utilityApiService.getPosterImage(imdbMovie.Poster);
+        } catch (err) {
+          imdbMovie.Poster = '';
+          logger.error('Unable to download movie poster via OmdbAPI URL.', err);
+        }
+      }
 
-      const posterBlob = await utilityApiService.getPosterImage(posterURL);
-      imdbMovie.Poster = posterURL;
+      if (
+        !posterBlob &&
+        tmdbMovie?.poster_path !== null &&
+        tmdbMovie?.poster_path !== undefined
+      ) {
+        try {
+          posterBlob = await utilityApiService.getPosterImage(
+            tmdbMovie.poster_path,
+          );
+          imdbMovie.Poster = tmdbMovie.poster_path;
+        } catch (err) {
+          logger.error('Unable to download movie poster via TmdbAPI URL.', err);
+        }
+      }
 
       if (tmdbMovie) {
         imdbMovie.Plot =
@@ -152,10 +168,10 @@ export const LibrarySearchBar = () => {
         detail: toMovieDetail(imdbMovie),
         poster: posterBlob
           ? {
-            url: imdbMovie.Poster,
-            mime: posterBlob?.type,
-            blob: posterBlob,
-          }
+              url: imdbMovie.Poster,
+              mime: posterBlob?.type,
+              blob: posterBlob,
+            }
           : undefined,
         categories: searchedCategory ? [searchedCategory] : [],
       };
@@ -165,7 +181,8 @@ export const LibrarySearchBar = () => {
       setShowDropdown(false);
 
       toast.success(
-        `"${movie.title}" added to ${APP_TITLE}${searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
+        `"${movie.title}" added to ${APP_TITLE}${
+          searchedCategory ? ` (in "${SYSTEM_CATEGORY_SEARCHED}")` : ''
         }`,
       );
     } catch (err) {
@@ -196,15 +213,15 @@ export const LibrarySearchBar = () => {
     setLoading(true);
 
     try {
-      const imdbId = await tmdbApiService.getExternalIds(tmdbMovie.id);
+      const imdbID = await tmdbApiService.getExternalIds(tmdbMovie.id);
 
-      if (!imdbId) {
+      if (!imdbID) {
         toast.info(`"${tmdbMovie.title}" IMDB ID is not available.`);
         setLoading(false);
         return;
       }
 
-      await processMovieByImdbId(imdbId, tmdbMovie);
+      await processMovieByImdbID(imdbID, tmdbMovie);
     } catch (err) {
       logger.error('An error occurred during selection:', err);
       toast.error(
@@ -214,8 +231,8 @@ export const LibrarySearchBar = () => {
     }
   };
 
-  const handleSelectByImdbId = async (imdbId: string) => {
-    const cleanId = imdbId.trim();
+  const handleSelectByImdbID = async (imdbID: string) => {
+    const cleanId = imdbID.trim();
     if (!cleanId) return;
 
     logger.info(`Searching for IMDb ID: ${cleanId}`);
@@ -224,7 +241,7 @@ export const LibrarySearchBar = () => {
     try {
       // Try to get TMDB info first for better metadata (overview, poster)
       const tmdbMovie = await tmdbApiService.getMovieByImdbId(cleanId);
-      await processMovieByImdbId(cleanId, tmdbMovie || undefined);
+      await processMovieByImdbID(cleanId, tmdbMovie || undefined);
     } catch (err) {
       logger.error('An error occurred during IMDb lookup:', err);
       toast.error(
@@ -253,7 +270,7 @@ export const LibrarySearchBar = () => {
       if (showDropdown && activeIndex >= 0 && searchResults[activeIndex]) {
         handleSelectMovie(searchResults[activeIndex]);
       } else if (filters.query.startsWith(':')) {
-        handleSelectByImdbId(filters.query.substring(1));
+        handleSelectByImdbID(filters.query.substring(1));
       }
     } else if (e.key === 'Escape') {
       setShowDropdown(false);
@@ -330,8 +347,10 @@ export const LibrarySearchBar = () => {
             searchResults.map((movie, index) => (
               <div
                 key={movie.id}
-                className={`flex items-center gap-3 p-2 cursor-pointer transition-colors ${index === activeIndex ? 'bg-accent' : 'hover:bg-accent'
-                  }`}
+                className={cn(
+                  'flex items-center gap-3 p-2 cursor-pointer transition-colors',
+                  index === activeIndex ? 'bg-accent' : 'hover:bg-accent',
+                )}
                 onClick={() => handleSelectMovie(movie)}
                 onMouseEnter={() => setActiveIndex(index)}>
                 {movie.poster_path ? (

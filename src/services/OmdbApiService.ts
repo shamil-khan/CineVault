@@ -146,25 +146,25 @@ class OmdbApiService {
   /**
    * Get movie details by IMDb ID
    */
-  getMovieByImdbId = async (imdbId: string): Promise<OmdbMovieResult> => {
+  getMovieByImdbId = async (imdbID: string): Promise<OmdbMovieResult> => {
     try {
       const response = await this.apiService.get<OmdbMovieResult>('', {
         params: {
           apikey: OMDB_API_KEY,
-          i: imdbId,
+          i: imdbID,
         },
       });
 
       if (response.data.Response === OmdbApi.ReservedWords.False) {
         logger.warn(
-          `Movie not found for IMDb ID '${imdbId}': ${response.data.Error}`,
+          `Movie not found for IMDb ID '${imdbID}': ${response.data.Error}`,
         );
         // throw new Error(response.data.Error || 'Movie not found');
       }
 
       return response.data;
     } catch (error) {
-      logger.error(`Error getting movie by IMDb ID '${imdbId}':`, error);
+      logger.error(`Error getting movie by IMDb ID '${imdbID}':`, error);
       throw error;
     }
   };

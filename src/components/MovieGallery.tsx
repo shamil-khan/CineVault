@@ -1,4 +1,4 @@
-import { Trash2, Tags, X, CheckSquare } from 'lucide-react';
+import { Trash2, Tags, X, CheckSquare, Heart, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MovieCard } from '@/components/MovieCard';
 import { useMovieFilters } from '@/hooks/useMovieFilters';
@@ -13,6 +13,8 @@ export const MovieGallery = () => {
     handleSelectAllMovies,
     handleClearSelection,
     handleBatchDeleteMovies,
+    handleBatchToggleFavorite,
+    handleBatchToggleWatched,
   } = useMovieLibrary();
   const { open: openCategoryDialog } = useCategoryDialog();
 
@@ -89,6 +91,24 @@ export const MovieGallery = () => {
               onClick={handleSelectAll}
               title='Select All'>
               <CheckSquare className='h-4 w-4' />
+            </Button>
+
+            <Button
+              variant='ghost'
+              size='icon'
+              className='text-[#d80f1c] hover:text-[#d80f1c] hover:bg-red-50'
+              onClick={() => handleBatchToggleFavorite(selectedMovieIds)}
+              title='Toggle Favorite'>
+              <Heart className='h-5 w-5' />
+            </Button>
+
+            <Button
+              variant='ghost'
+              size='icon'
+              className='text-amber-500 hover:text-amber-600 hover:bg-amber-50'
+              onClick={() => handleBatchToggleWatched(selectedMovieIds)}
+              title='Toggle Watched'>
+              <Eye className='h-5 w-5' />
             </Button>
 
             <Button
