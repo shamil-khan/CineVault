@@ -23,13 +23,18 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: [
         'favicon.ico',
         'apple-touch-icon.png',
         'pwa-192x192.png',
         'pwa-512x512.png',
       ],
+      workbox: {
+        cleanupOutdatedCaches: true, // Recommended to free up storage
+        clientsClaim: true,
+        skipWaiting: true,
+      },
       manifest: {
         name: 'Cine Vault',
         short_name: 'Cine Vault',

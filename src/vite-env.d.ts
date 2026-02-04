@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-pwa/client" />
+/// <reference types="vite-plugin-pwa/react" />
 declare module '*.md?raw';
 interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;

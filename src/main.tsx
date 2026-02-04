@@ -1,12 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import '@/index.css';
+import { ReloadPrompt } from '@/components/ReloadPrompt';
 import App from '@/App.tsx';
+import '@/index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <ReloadPrompt />
       <App />
     </BrowserRouter>
   </StrictMode>,
