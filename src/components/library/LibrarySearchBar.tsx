@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
@@ -23,12 +24,13 @@ const TMDB_IMAGE_URL = import.meta.env.VITE_TMDB_IMAGE_URL;
 
 export const LibrarySearchBar = () => {
   const { filters, onFiltersUpdated } = useMovieFilters();
-  const { movies, getCategory, handleAddMovie } = useMovieLibrary();
+  const { movies, loadMovies, getCategory, handleAddMovie } = useMovieLibrary();
   const [searchResults, setSearchResults] = useState<TmdbMovieResult[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
   const [tmdbLoading, setTmdbLoading] = useState(false);
+  const refreshRef = useRef(false);
   const ignoreSearch = useRef(false);
   const manualChanged = useRef(false);
 
@@ -276,18 +278,31 @@ export const LibrarySearchBar = () => {
     }
   };
 
+  const refreshApp = () => {
+    if (refreshRef.current) return;
+    refreshRef.current = true;
+    (async () => {
+      try {
+        await loadMovies();
+        logger.info('loading done');
+      } finally {
+        refreshRef.current = false;
+      }
+    })();
+  };
+
   return (
     <div className='relative flex-1'>
       <div className='relative flex items-center gap-3 rounded-2xl bg-white/80 p-2 shadow-sm ring-1 ring-zinc-200 focus-within:ring-2 focus-within:ring-red-500/30 transition-all'>
         <div className='pl-2 border-r border-zinc-100 pr-3'>
-          <span
+          <Button
+            variant='ghost'
             className={cn(
-              'text-[#d80f1c] font-black leading-none shadow-sm transition-all shrink-0',
-              'hover:brightness-105 active:scale-95',
-              'text-[10px] px-1.5 py-0.5 rounded-md',
-            )}>
-            LMDb
-          </span>
+              'text-[#d80f1c] hover:text-[#a40a14] hover:bg-red-50 font-black ',
+            )}
+            onClick={refreshApp}>
+            CineVault
+          </Button>
         </div>
         <Input
           type='text'

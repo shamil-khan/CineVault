@@ -15,12 +15,12 @@ import { APP_TITLE, pluralName } from '@/utils/Helper';
 import { Button } from '@/components/ui/button';
 
 function App() {
-  const { movies, loadMovies } = useMovieLibrary();
+  const { movies, loadMovies, isLoading } = useMovieLibrary();
   const { hasActiveFilters, filteredMovies } = useMovieFilters();
   const appRef = useRef(false);
-  const [loaded, setLoaded] = useState<boolean>(false);
   const [aboutVisible, setAboutVisible] = useState<boolean>(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
+
   useEffect(() => {
     if (appRef.current) {
       return;
@@ -30,22 +30,12 @@ function App() {
       appRef.current = true;
       const loadAll = async () => {
         await loadMovies();
-        setLoaded(true);
       };
       void loadAll();
     }, 500);
 
     return () => clearTimeout(loadingId);
   }, [loadMovies]);
-
-  if (!loaded) {
-    return (
-      <div className='flex items-center justify-center h-screen'>
-        <Spinner className='h-10 w-10 text-blue-600' />
-        <span className='font-bold'>Loading {APP_TITLE}</span>
-      </div>
-    );
-  }
 
   if (aboutVisible) {
     return <About onClose={() => setAboutVisible(false)} />;
@@ -105,6 +95,16 @@ function App() {
             'rounded-[20px] backdrop-blur-xl bg-white/80 dark:bg-zinc-900/80 border-none shadow-2xl',
         }}
       />
+      {isLoading && (
+        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex flex-col items-center justify-center gap-4 transition-all duration-300'>
+          <div className='bg-white/10 p-8 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl flex flex-col items-center gap-4'>
+            <Spinner className='h-12 w-12 text-white' />
+            <span className='text-white font-bold text-lg animate-pulse'>
+              Loading {APP_TITLE}...
+            </span>
+          </div>
+        </div>
+      )}
     </ErrorBoundary>
   );
 }

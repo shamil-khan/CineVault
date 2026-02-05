@@ -16,6 +16,7 @@ interface MovieLibraryState {
   movies: MovieInfo[];
   categories: Category[];
   filters: MovieFilterCriteria;
+  isLoading: boolean;
   selectedMovieIds: string[];
   loadMovies: () => Promise<void>;
   addMovie: (movie: MovieInfo) => Promise<void>;
@@ -132,8 +133,10 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         isWatched: undefined,
       },
       selectedMovieIds: [],
+      isLoading: false,
 
       loadMovies: async () => {
+        set({ isLoading: true });
         try {
           const [details, posters, statuses, categories, movieCategories] =
             await Promise.all([
@@ -165,6 +168,8 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         } catch (err) {
           logger.error('Failed to load movies:', err);
           set({ movies: [], categories: [] });
+        } finally {
+          set({ isLoading: false });
         }
       },
 

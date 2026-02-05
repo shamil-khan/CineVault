@@ -21,6 +21,7 @@ export const useMovieLibrary = () => {
     removeMovieFromCategory,
     toggleMovieFavorite,
     toggleMovieWatched,
+    isLoading,
     selectedMovieIds,
     toggleMovieSelection,
     selectAllMovies,
@@ -36,6 +37,7 @@ export const useMovieLibrary = () => {
   return {
     movies,
     categories,
+    isLoading,
     userCategories: categories.filter(
       (c) =>
         c.name !== SYSTEM_CATEGORY_IMPORTED &&
