@@ -326,6 +326,17 @@ class MovieDbService {
     }
   };
 
+  /**
+   * Factory Reset: Deletes the entire database and re-initializes it.
+   */
+  factoryReset = async () => {
+    logger.warn('Performing Factory Reset...');
+    await db.delete();
+    await db.open();
+    await this.initDatabase();
+    logger.success('Factory Reset complete.');
+  };
+
   addMovieToCategory = async (
     imdbID: string,
     categoryId: number,

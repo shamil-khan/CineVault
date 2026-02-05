@@ -56,6 +56,7 @@ interface MovieLibraryState {
   ) => Promise<void>;
 
   clearStore: (deleteCategories: boolean) => Promise<boolean>;
+  factoryReset: () => Promise<void>;
   updatedFilters: (filters: MovieFilterCriteria) => void;
   clearFilters: () => void;
 }
@@ -498,6 +499,17 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
           logger.error(`Failed to clear ${APP_TITLE}:`, err);
           toast.error(`Failed to clear ${APP_TITLE}`);
           return false;
+        }
+      },
+
+      factoryReset: async () => {
+        try {
+          await movieDbService.factoryReset();
+          await get().loadMovies();
+          toast.success(`${APP_TITLE} has been factory reset.`);
+        } catch (err) {
+          logger.error(`Failed to factory reset ${APP_TITLE}:`, err);
+          toast.error(`Failed to factory reset ${APP_TITLE}`);
         }
       },
 

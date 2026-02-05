@@ -7,6 +7,8 @@ import {
   ChevronRight,
   FileJson,
   AlertOctagon,
+  RotateCcw,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +34,8 @@ import logger from '@/core/logger';
 
 export const DataManagementDialog = () => {
   const { isOpen, close } = useDataManagementDialog();
-  const { movies, userCategories, handleClearLibrary } = useMovieLibrary();
+  const { movies, userCategories, handleClearLibrary, handleFactoryReset } =
+    useMovieLibrary();
   const { clear } = useMovieProcessor();
   const { exportMovies, importMovies } = useImportExport();
   const [deleteCategories, setDeleteCategories] = useState(false);
@@ -97,9 +100,28 @@ export const DataManagementDialog = () => {
   };
 
   const handleClearLibraryWithReset = async () => {
-    clear();
-    await handleClearLibrary(deleteCategories);
-    setDeleteCategories(false);
+    if (confirm(`Delete ALL movies from ${APP_TITLE}?`)) {
+      clear();
+      await handleClearLibrary(deleteCategories);
+      setDeleteCategories(false);
+    }
+  };
+
+  const handleFullFactoryReset = async () => {
+    if (
+      confirm(
+        `Are you absolutely sure you want to FACTORY RESET ${APP_TITLE}?\n\nThis will completely wipe the database and re-initialize it. EVERYTHING will be lost permanently.`,
+      )
+    ) {
+      if (
+        confirm(
+          `Final Warning: This is irreversible. Do you really want to proceed with the Factory Reset?`,
+        )
+      ) {
+        clear();
+        await handleFactoryReset();
+      }
+    }
   };
 
   return (
@@ -195,43 +217,78 @@ export const DataManagementDialog = () => {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Delete Section */}
+          {/* Danger Zone Section */}
           <AccordionItem value='delete'>
             <AccordionTrigger>
               <h4 className='text-sm font-semibold flex items-center gap-2 text-destructive'>
-                <AlertOctagon className='h-5 w-5' /> Delete {APP_TITLE}?
+                <AlertOctagon className='h-5 w-5' /> Danger Zone
               </h4>
             </AccordionTrigger>
             <AccordionContent>
-              <div className='space-y-3'>
-                <p className='text-xs text-muted-foreground'>
-                  This will permanently delete ALL movies, files, and posters
-                  from your local database. This action cannot be undone.
-                </p>
-                {userCategories.length > 0 && (
-                  <>
-                    <div className='mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 max-h-40 overflow-y-auto'>
-                      <p className='mb-2 text-xs font-medium text-destructive'>
-                        Categories in {APP_TITLE}
-                      </p>
-                      <ul className='space-y-1 text-xs'>
-                        {userCategories.map((category) => (
-                          <li
-                            key={category.id}
-                            className='flex items-center justify-between'>
-                            <span>{category.name}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className='mt-4 flex items-center justify-between rounded-md border p-3'>
-                      <div className='space-y-1'>
-                        <p className='text-sm font-medium'>
-                          Also delete categories
+              <div className='space-y-6 pt-4'>
+                {/* Factory Reset - Premium UI */}
+                <div className='relative group'>
+                  <div className='absolute -inset-0.5 bg-linear-to-r from-red-600 to-rose-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200'></div>
+                  <div className='relative bg-white dark:bg-zinc-900 rounded-2xl border border-red-100 dark:border-red-900/30 p-5 space-y-4'>
+                    <div className='flex items-start justify-between'>
+                      <div className='space-y-1.5'>
+                        <div className='flex items-center gap-2 text-red-600 dark:text-red-400'>
+                          <Zap className='w-5 h-5 fill-current' />
+                          <h5 className='font-bold text-base tracking-tight'>
+                            Factory Reset
+                          </h5>
+                        </div>
+                        <p className='text-xs text-muted-foreground leading-relaxed'>
+                          Completely wipe the database and restore to initial
+                          state. This will remove ALL movies, custom categories,
+                          and settings.
                         </p>
-                        <p className='text-xs text-muted-foreground'>
-                          If enabled, all categories will be removed. Otherwise
-                          categories are kept.
+                      </div>
+                      <div className='bg-red-50 dark:bg-red-950/30 p-2.5 rounded-xl'>
+                        <RotateCcw className='w-5 h-5 text-red-600 dark:text-red-400' />
+                      </div>
+                    </div>
+
+                    <Button
+                      variant='destructive'
+                      onClick={handleFullFactoryReset}
+                      className='w-full h-11 bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 border-none shadow-lg shadow-red-200 dark:shadow-none transition-all duration-300 active:scale-[0.98] font-bold rounded-xl'>
+                      Perform Factory Reset
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className='relative flex items-center gap-4 py-2'>
+                  <div className='flex-1 h-px bg-zinc-100 dark:bg-zinc-800' />
+                  <span className='text-[10px] font-bold text-zinc-400 uppercase tracking-widest'>
+                    or
+                  </span>
+                  <div className='flex-1 h-px bg-zinc-100 dark:bg-zinc-800' />
+                </div>
+
+                {/* Simple Delete */}
+                <div className='space-y-4 px-1'>
+                  <div className='flex items-center gap-3'>
+                    <div className='p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg'>
+                      <AlertOctagon className='w-4 h-4 text-zinc-500' />
+                    </div>
+                    <div className='space-y-0.5'>
+                      <h6 className='text-sm font-semibold'>
+                        Delete Movie Library
+                      </h6>
+                      <p className='text-[11px] text-muted-foreground'>
+                        Remove all movies. Keep or delete categories below.
+                      </p>
+                    </div>
+                  </div>
+
+                  {userCategories.length > 0 && (
+                    <div className='flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-3.5 transition-all'>
+                      <div className='space-y-1'>
+                        <p className='text-xs font-bold'>Category Retention</p>
+                        <p className='text-[10px] text-muted-foreground'>
+                          Include custom categories in deletion
                         </p>
                       </div>
 
@@ -239,22 +296,34 @@ export const DataManagementDialog = () => {
                         type='button'
                         variant={deleteCategories ? 'destructive' : 'outline'}
                         size='sm'
-                        onClick={() => setDeleteCategories((prev) => !prev)}>
-                        {deleteCategories ? 'Will delete' : 'Keep categories'}
+                        onClick={() => setDeleteCategories((prev) => !prev)}
+                        className={cn(
+                          'h-8 px-4 rounded-lg text-[11px] font-bold transition-all',
+                          !deleteCategories &&
+                            'hover:bg-zinc-200 dark:hover:bg-zinc-800',
+                        )}>
+                        {deleteCategories ? 'Delete All' : 'Keep Categories'}
                       </Button>
                     </div>
-                  </>
-                )}
-                <Button
-                  variant='destructive'
-                  className='w-full'
-                  onClick={handleClearLibraryWithReset}>
-                  Delete
-                </Button>
+                  )}
+
+                  <Button
+                    variant='outline'
+                    className='w-full h-10 border-red-200 dark:border-red-900/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-700 font-semibold rounded-xl transition-all'
+                    onClick={handleClearLibraryWithReset}>
+                    Clear Movies Only
+                  </Button>
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+        <Button
+          variant='ghost'
+          onClick={close}
+          className='w-full flex items-center gap-2'>
+          Close
+        </Button>
       </DialogContent>
     </Dialog>
   );

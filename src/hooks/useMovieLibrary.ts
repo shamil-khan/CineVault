@@ -32,6 +32,7 @@ export const useMovieLibrary = () => {
     batchAddMoviesToCategory,
     batchRemoveMoviesFromCategory,
     clearStore,
+    factoryReset,
   } = useMovieLibraryStore();
 
   return {
@@ -66,5 +67,6 @@ export const useMovieLibrary = () => {
     handleBatchAddMoviesToCategory: batchAddMoviesToCategory,
     handleBatchRemoveMoviesFromCategory: batchRemoveMoviesFromCategory,
     handleClearLibrary: clearStore,
+    handleFactoryReset: factoryReset,
   };
 };
