@@ -1,4 +1,14 @@
-import { Trash2, Tags, X, CheckSquare, Heart, Eye } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Trash2,
+  Tags,
+  X,
+  CheckSquare,
+  Heart,
+  Eye,
+  EyeOff,
+  HeartOff,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MovieCard } from '@/components/MovieCard';
 import { useMovieFilters } from '@/hooks/useMovieFilters';
@@ -13,10 +23,12 @@ export const MovieGallery = () => {
     handleSelectAllMovies,
     handleClearSelection,
     handleBatchDeleteMovies,
-    handleBatchToggleFavorite,
-    handleBatchToggleWatched,
+    handleBatchMarkFavorite,
+    handleBatchMarkWatched,
   } = useMovieLibrary();
   const { open: openCategoryDialog } = useCategoryDialog();
+  const [markFavorite, setMarkFavorite] = useState(false);
+  const [markWatched, setMarkWatched] = useState(false);
 
   const selectionMode = selectedMovieIds.length > 0;
 
@@ -97,18 +109,32 @@ export const MovieGallery = () => {
               variant='ghost'
               size='icon'
               className='text-[#d80f1c] hover:text-[#d80f1c] hover:bg-red-50'
-              onClick={() => handleBatchToggleFavorite(selectedMovieIds)}
+              onClick={() => {
+                handleBatchMarkFavorite(selectedMovieIds, !markFavorite);
+                setMarkFavorite(!markFavorite);
+              }}
               title='Toggle Favorite'>
-              <Heart className='h-5 w-5' />
+              {markFavorite ? (
+                <HeartOff className='h-5 w-5  fill-[#d80f1c]' />
+              ) : (
+                <Heart className='h-5 w-5 fill-[#d80f1c]' />
+              )}
             </Button>
 
             <Button
               variant='ghost'
               size='icon'
-              className='text-amber-500 hover:text-amber-600 hover:bg-amber-50'
-              onClick={() => handleBatchToggleWatched(selectedMovieIds)}
+              className='text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50'
+              onClick={() => {
+                handleBatchMarkWatched(selectedMovieIds, !markWatched);
+                setMarkWatched(!markWatched);
+              }}
               title='Toggle Watched'>
-              <Eye className='h-5 w-5' />
+              {markWatched ? (
+                <EyeOff className='h-5 w-5' />
+              ) : (
+                <Eye className='h-5 w-5' />
+              )}
             </Button>
 
             <Button

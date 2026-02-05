@@ -43,8 +43,8 @@ interface MovieLibraryState {
   selectAllMovies: (imdbIDs: string[]) => void;
   clearSelection: () => void;
   batchDeleteMovies: (imdbIDs: string[]) => Promise<void>;
-  batchToggleFavorite: (imdbIDs: string[]) => Promise<void>;
-  batchToggleWatched: (imdbIDs: string[]) => Promise<void>;
+  batchMarkFavorite: (imdbIDs: string[], value: boolean) => Promise<void>;
+  batchMarkWatched: (imdbIDs: string[], value: boolean) => Promise<void>;
   batchAddMoviesToCategory: (
     imdbIDs: string[],
     category: Category,
@@ -77,6 +77,34 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
 
       status.isFavorite = isFavorite ? !status.isFavorite : status.isFavorite;
       status.isWatched = isWatched ? !status.isWatched : status.isWatched;
+
+      set((state) => {
+        state.movies = state.movies.map((m) =>
+          m.imdbID !== imdbID ? m : { ...m, status: status },
+        );
+      });
+
+      await movieDbService.addUpdateUserStatus(imdbID, status);
+      return status!;
+    };
+
+    const markUserStatus = async (
+      imdbID: string,
+      value: boolean,
+      isFavorite = false,
+      isWatched = false,
+    ): Promise<Omit<MovieUserStatus, 'imdbID'>> => {
+      const movie = get().movies.find((m) => m.imdbID === imdbID)!;
+
+      const status = movie.status
+        ? {
+            isFavorite: movie.status.isFavorite,
+            isWatched: movie.status.isWatched,
+          }
+        : { isFavorite: false, isWatched: false };
+
+      status.isFavorite = isFavorite ? value : status.isFavorite;
+      status.isWatched = isWatched ? value : status.isWatched;
 
       set((state) => {
         state.movies = state.movies.map((m) =>
@@ -371,12 +399,12 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         }
       },
 
-      batchToggleFavorite: async (imdbIDs: string[]) => {
+      batchMarkFavorite: async (imdbIDs: string[], value: boolean) => {
         try {
           // In a real app, you might want to determine the target state (all fav or toggle each).
           // For simplicity, we toggle each.
           await Promise.all(
-            imdbIDs.map((id) => toggleUserStatus(id, true, false)),
+            imdbIDs.map((id) => markUserStatus(id, value, true, false)),
           );
           toast.success(`Updated favorites for ${imdbIDs.length} movies`);
         } catch (err) {
@@ -385,10 +413,10 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
         }
       },
 
-      batchToggleWatched: async (imdbIDs: string[]) => {
+      batchMarkWatched: async (imdbIDs: string[], value: boolean) => {
         try {
           await Promise.all(
-            imdbIDs.map((id) => toggleUserStatus(id, false, true)),
+            imdbIDs.map((id) => markUserStatus(id, value, false, true)),
           );
           toast.success(`Updated watched status for ${imdbIDs.length} movies`);
         } catch (err) {
@@ -485,8 +513,8 @@ export const useMovieLibraryStore = create<MovieLibraryState>()(
             language: [],
             country: [],
             category: [],
-            isFavorite: false,
-            isWatched: false,
+            isFavorite: undefined,
+            isWatched: undefined,
           };
         });
       },
