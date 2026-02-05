@@ -104,7 +104,7 @@ export const DataManagementDialog = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className='w-[calc(100%-2rem)] sm:max-w-md rounded-lg'>
+      <DialogContent className='w-[calc(100%-2rem)] sm:max-w-106.25 rounded-lg top-[5%] translate-y-0 sm:top-1/2 sm:-translate-y-1/2 max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <FileJson className='w-5 h-5 text-blue-500' />
